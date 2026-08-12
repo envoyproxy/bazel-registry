@@ -1,0 +1,104 @@
+#name: _publish
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    secrets:
+      app-id:
+      app-key:
+    inputs:
+      committer-email:
+        required: true
+        type: string
+      committer-name:
+        required: true
+        type: string
+      dry-run:
+        default: false
+        type: boolean
+      sha:
+        default: ${{ github.event.workflow_run.head_sha }}
+        type: string
+
+
+jobs:
+  publish:
+    permissions:
+      actions: read
+      contents: write
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: envoyproxy/toolshed/actions/appauth@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
+      id: appauth
+      name: Appauth
+      if: >-
+        ! inputs.dry-run
+      with:
+        app_id: ${{ secrets.app-id }}
+        key: ${{ secrets.app-key }}
+    - id: checkout
+      name: Checkout the repository
+      uses: envoyproxy/toolshed/actions/github/checkout@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
+      with:
+        branch: main
+        committer-name: ${{ inputs.committer-name }}
+        committer-email: ${{ inputs.committer-email }}
+        config: |
+          ref: ${{ inputs.sha }}
+        token: ${{ steps.appauth.outputs.token }}
+    - name: Get version info
+      id: version
+      uses: envoyproxy/toolshed/actions/version@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
+      with:
+        version-file: VERSION
+    - name: Check if release is needed
+      id: check
+      uses: envoyproxy/toolshed/actions/jq@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
+      with:
+        options: -r
+        input: ${{ steps.version.outputs.version }}
+        filter: |
+          if .is_dev then "false" else "true" end
+    - name: Create release
+      if: fromJSON(steps.check.outputs.value)
+      env:
+        GH_TOKEN: ${{ steps.appauth.outputs.token || github.token }}
+        TAG: ${{ fromJSON(steps.version.outputs.version).version }}
+        DRY_RUN: ${{ inputs.dry-run }}
+      run: |
+        if gh release view "${TAG}" --repo "${{ github.repository }}" &>/dev/null; then
+            echo "::warning::Release ${TAG} already exists, skipping creation"
+            exit 0
+        fi
+        if [[ "${DRY_RUN}" == "true" ]]; then
+            echo "Dry run: would create release ${TAG}"
+            exit 0
+        fi
+        gh release create "${TAG}" \
+            --target "${{ inputs.sha }}" \
+            --title "Release ${TAG}" \
+            --notes "Release ${TAG}" \
+            --repo "${{ github.repository }}"
+    - name: Push dev version
+      if: fromJSON(steps.check.outputs.value)
+      env:
+        GH_TOKEN: ${{ steps.appauth.outputs.token || github.token }}
+        DEV_VERSION: ${{ fromJSON(steps.version.outputs.version).next }}
+        DRY_RUN: ${{ inputs.dry-run }}
+      run: |
+        git fetch origin main
+        git checkout -B main origin/main
+        echo "${DEV_VERSION}" > VERSION
+        if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No changes to commit for dev version"
+            exit 0
+        fi
+        git commit VERSION -m "Version ${DEV_VERSION}" --signoff
+        git show
+        if [[ "${DRY_RUN}" == "true" ]]; then
+            echo "Dry run: skipping push of dev version ${DEV_VERSION}"
+            exit 0
+        fi
+        git push origin HEAD:refs/heads/main
