@@ -114,12 +114,18 @@ def git_changed_files(base, head):
     if not base or set(base.removeprefix("origin/")) == {"0"}:
         # No usable diff basis (eg branch creation push).
         return []
-    output = subprocess.run(
+    proc = subprocess.run(
         ["git", "diff", "--name-only", f"{base}...{head}"],
         capture_output=True,
-        check=True,
-        text=True).stdout
-    return [line for line in output.splitlines() if line]
+        text=True)
+    if proc.returncode != 0:
+        # Diff basis unreachable (eg force push) - fall back to an
+        # empty changed set rather than failing selection outright.
+        print(
+            f"WARNING: unable to diff {base}...{head}: {proc.stderr.strip()}",
+            file=sys.stderr)
+        return []
+    return [line for line in proc.stdout.splitlines() if line]
 
 
 def select(event, changed_files, modules_root, module="", version=""):

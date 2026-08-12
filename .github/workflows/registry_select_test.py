@@ -142,6 +142,9 @@ class RegistrySelectTest(unittest.TestCase):
         self.assertEqual(registry_select.git_changed_files("", "HEAD"), [])
         self.assertEqual(
             registry_select.git_changed_files("0" * 40, "HEAD"), [])
+        # Unreachable diff basis (eg force push) falls back to empty.
+        self.assertEqual(
+            registry_select.git_changed_files("f" * 40, "HEAD"), [])
 
 
 if __name__ == "__main__":
