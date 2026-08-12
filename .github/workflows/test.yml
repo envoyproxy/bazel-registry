@@ -1,0 +1,26 @@
+name: CI testing
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+  schedule:
+  - cron: '0 4 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+
+jobs:
+  request:
+    runs-on: ubuntu-slim
+    outputs:
+      entries: ${{ steps.select.outputs.entries }}
+    steps:
+    - run: |
+        df -h
