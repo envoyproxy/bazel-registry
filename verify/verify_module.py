@@ -148,8 +148,12 @@ def fetch_source(version_dir, dest):
 
 
 def create_workspace(args, version_dir, tasks, uses_test_module, module_path):
-    """Create the scratch consumer workspace, returning its path."""
+    """Create the scratch consumer workspace.
+
+    Returns (workspace_path, is_test_module).
+    """
     workspace = pathlib.Path(args.scratch) / "workspace"
+    is_test_module = True
     local_test_module = version_dir / "test_module"
     if local_test_module.is_dir():
         log(f"Using registry test_module: {local_test_module}")
@@ -166,6 +170,7 @@ def create_workspace(args, version_dir, tasks, uses_test_module, module_path):
         shutil.copytree(test_module, workspace)
     else:
         log("No test module; synthesising anonymous stub consumer")
+        is_test_module = False
         workspace.mkdir(parents=True)
         (workspace / "MODULE.bazel").write_text(
             'module(name = "verify_consumer")\n'
@@ -179,7 +184,7 @@ def create_workspace(args, version_dir, tasks, uses_test_module, module_path):
             f'\nsingle_version_override(module_name = "{args.module}", '
             f'version = "{args.version}")\n')
     write_bazelrc(args, workspace)
-    return workspace
+    return workspace, is_test_module
 
 
 def write_bazelrc(args, workspace):
@@ -262,10 +267,8 @@ def assert_local_registry(args, workspace):
     log(f"✓ {args.module}@{args.version} resolved from local registry")
 
 
-def default_flags_and_targets(args, tasks):
-    """Build/test flags+targets from presubmit tasks, or stub defaults."""
-    if not tasks:
-        return [([], [f"@{args.module}//..."], [], [])]
+def default_flags_and_targets(args, tasks, is_test_module, uses_test_module):
+    """Build/test flags+targets from presubmit tasks, or defaults."""
     plans = []
     for name, task in tasks:
         plans.append((
@@ -273,6 +276,12 @@ def default_flags_and_targets(args, tasks):
             task.get("build_targets") or [],
             task.get("test_flags") or [],
             task.get("test_targets") or []))
+    if is_test_module and not uses_test_module:
+        # A hand-written registry test_module without bcr_test_module
+        # tasks: build and test its own targets as well.
+        plans.append(([], ["//..."], [], ["//..."]))
+    if not plans:
+        plans.append(([], [f"@{args.module}//..."], [], []))
     return plans
 
 
@@ -283,9 +292,10 @@ def verify(args):
         raise VerificationError(f"No such module version: {version_dir}")
     tasks, uses_test_module, module_path = parse_presubmit(
         version_dir / "presubmit.yml")
-    workspace = create_workspace(
+    workspace, is_test_module = create_workspace(
         args, version_dir, tasks, uses_test_module, module_path)
-    plans = default_flags_and_targets(args, tasks)
+    plans = default_flags_and_targets(
+        args, tasks, is_test_module, uses_test_module)
     for i, (build_flags, build_targets, test_flags, test_targets) \
             in enumerate(plans):
         suffix = f".{i}" if len(plans) > 1 else ""
