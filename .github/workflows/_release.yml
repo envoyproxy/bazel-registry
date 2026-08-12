@@ -1,0 +1,92 @@
+#name: _release
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    secrets:
+      app-id:
+      app-key:
+    inputs:
+      committer-email:
+        type: string
+        required: true
+      committer-name:
+        type: string
+        required: true
+      dry-run:
+        description: Dry run (no PR created)
+        type: boolean
+        default: false
+      release-version:
+        description: Release version (overrides version.next if set)
+        type: string
+        default:
+
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: envoyproxy/toolshed/actions/appauth@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
+      id: appauth
+      name: Appauth
+      if: >-
+        ! inputs.dry-run
+      with:
+        app_id: ${{ secrets.app-id }}
+        key: ${{ secrets.app-key }}
+    - id: checkout
+      name: Checkout the repository
+      uses: envoyproxy/toolshed/actions/github/checkout@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
+      with:
+        branch: main
+        committer-name: ${{ inputs.committer-name }}
+        committer-email: ${{ inputs.committer-email }}
+        pr: ${{ github.event.pull_request.number || '' }}
+        token: ${{ steps.appauth.outputs.token }}
+    - name: Get version info
+      id: version
+      uses: envoyproxy/toolshed/actions/version@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
+      with:
+        version-file: VERSION
+    - name: Update VERSION file
+      uses: envoyproxy/toolshed/actions/bson@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
+      with:
+        input: |
+          version: ${{ steps.version.outputs.version }}
+          release_version: ${{ inputs.release-version || fromJSON(steps.version.outputs.version).next }}
+        filter: |
+          if .version.is_dev then
+            "echo \"\(.release_version)\" > VERSION"
+          else ":" end
+    - name: Commit changes
+      id: commit
+      env:
+        COMMIT_MESSAGE: >-
+          Release ${{ inputs.release-version || fromJSON(steps.version.outputs.version).next }}
+      run: |
+        if [[ -z "$(git status --porcelain)" ]]; then
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+            exit
+        fi
+        git commit VERSION -m "${COMMIT_MESSAGE}" --signoff
+        git show
+        echo "message=${COMMIT_MESSAGE}" >> "$GITHUB_OUTPUT"
+        echo "changes=true" >> "$GITHUB_OUTPUT"
+    - name: Create Pull Request
+      uses: envoyproxy/toolshed/actions/github/pr@98b13b6d4f551c27b406cb090d9ff7bf6877d1f6  # actions-v0.4.20 + fix
+      if: fromJSON(steps.commit.outputs.changes)
+      with:
+        base: main
+        branch: >-
+          release/create/${{ inputs.release-version || fromJSON(steps.version.outputs.version).next }}
+        commit: false
+        title: >-
+          ${{ steps.commit.outputs.message }}
+        body: |
+          Created by publish-envoy[bot] for @${{ github.actor }}
+        dry-run: ${{ inputs.dry-run }}
+        GITHUB_TOKEN: ${{ steps.appauth.outputs.token || github.token }}
