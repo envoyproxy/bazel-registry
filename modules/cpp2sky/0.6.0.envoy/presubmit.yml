@@ -12,4 +12,4 @@ tasks:
     platform: ${{ platform }}
     bazel: ${{ bazel }}
     build_targets:
-    - "@cpp2sky//..."
+    - "@cpp2sky//source:cpp2sky_data_lib"
