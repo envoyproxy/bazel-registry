@@ -14,8 +14,8 @@ Selection rules:
                            version given)
 
 Diff basis:
-  push  ->  the pushed range (`before...after`)
-  PR    ->  the shared ancestor (`origin/<base>...HEAD`)
+  push  ->  the pushed range (`before..after`)
+  PR    ->  merge base of `pull_request.base.sha` and HEAD
 
 "latest" is the last entry in `metadata.json` `versions` - the array is
 append-only so order is insertion order. The `.envoy` suffix is not
@@ -56,6 +56,7 @@ RELEVANT_FILES = (
 RELEVANT_DIRS = (
     "overlay",
     "patches",
+    "test_module",
 )
 
 
@@ -110,21 +111,45 @@ def changed_pairs(changed_files, modules_root):
     return pairs
 
 
-def git_changed_files(base, head):
-    if not base or set(base.removeprefix("origin/")) == {"0"}:
+def is_all_zeros_sha(value):
+    value = value.strip()
+    return len(value) == 40 and set(value) == {"0"}
+
+
+def git_changed_files(base, head, *, use_merge_base=False):
+    """Changed files between base and head.
+
+    Empty base and the all-zeros SHA sentinel mean there is no usable diff
+    basis (eg branch creation push), so an empty changed set is returned.
+    Any other resolution/diff failure is fatal.
+    """
+    if not base or is_all_zeros_sha(base):
         # No usable diff basis (eg branch creation push).
         return []
+    diff_base = base
+    if use_merge_base:
+        merge_base = subprocess.run(
+            ["git", "merge-base", base, head],
+            capture_output=True,
+            text=True)
+        if merge_base.returncode != 0:
+            raise RuntimeError(
+                f"ERROR: unable to resolve merge base between {base} and {head}: "
+                f"{merge_base.stderr.strip()}")
+        diff_base = merge_base.stdout.strip()
+        if not diff_base:
+            raise RuntimeError(
+                f"ERROR: merge base between {base} and {head} is empty")
+    # Pushes intentionally diff `before..after` (pushed range). PRs diff
+    # `merge_base(base, head)..head` via the branch above.
     proc = subprocess.run(
-        ["git", "diff", "--name-only", f"{base}...{head}"],
+        ["git", "diff", "--name-only", f"{diff_base}..{head}"],
         capture_output=True,
         text=True)
     if proc.returncode != 0:
-        # Diff basis unreachable (eg force push) - fall back to an
-        # empty changed set rather than failing selection outright.
-        print(
-            f"WARNING: unable to diff {base}...{head}: {proc.stderr.strip()}",
-            file=sys.stderr)
-        return []
+        raise RuntimeError(
+            f"ERROR: unable to diff {diff_base}..{head}: "
+            f"{proc.stderr.strip()}")
     return [line for line in proc.stdout.splitlines() if line]
 
 
@@ -157,10 +182,17 @@ def main():
     parser.add_argument("--version", default="")
     parser.add_argument("--modules-root", default="modules")
     args = parser.parse_args()
-    changed_files = (
-        git_changed_files(args.base, args.head)
-        if args.event in ("pull_request", "push")
-        else [])
+    try:
+        changed_files = (
+            git_changed_files(
+                args.base,
+                args.head,
+                use_merge_base=(args.event == "pull_request"))
+            if args.event in ("pull_request", "push")
+            else [])
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        sys.exit(2)
     selected = select(
         args.event,
         changed_files,

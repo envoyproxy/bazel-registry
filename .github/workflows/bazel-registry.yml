@@ -35,12 +35,17 @@ jobs:
         fetch-depth: 0
     - name: Test module selection
       run: python3 .github/workflows/registry_select_test.py
+    - name: Fetch pull request base SHA
+      if: github.event_name == 'pull_request'
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      run: git fetch --no-tags origin "+${BASE_SHA}"
     - name: Select modules
       id: select
       env:
         DIFF_BASE: >-
           ${{ github.event_name == 'pull_request'
-              && format('origin/{0}', github.base_ref)
+              && github.event.pull_request.base.sha
               || github.event.before }}
         INPUT_MODULE: ${{ inputs.module }}
         INPUT_VERSION: ${{ inputs.version }}
