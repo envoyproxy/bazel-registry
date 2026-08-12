@@ -184,3 +184,33 @@ jobs:
             else
               .
             end
+
+  verify:
+    # Tier 2: containerised BCR-style module verification. Non-blocking
+    # while it beds in (staging step 2).
+    if: >-
+      needs.module.outputs.versions != '[]'
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    needs:
+    - module
+    name: Verify module version (${{ inputs.module }}:${{ matrix.version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ${{ fromJSON(needs.module.outputs.versions) }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+    - run: |
+        ./verify/verify.sh \
+            --cold \
+            --artifacts "${{ runner.temp }}/verify-artifacts" \
+            "${{ inputs.module }}" \
+            "${{ matrix.version }}"
+      name: Verify ${{ inputs.module }}@${{ matrix.version }}
+    - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
+      if: always()
+      with:
+        name: verify-${{ inputs.module }}-${{ matrix.version }}
+        path: ${{ runner.temp }}/verify-artifacts
+        if-no-files-found: ignore
