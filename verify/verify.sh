@@ -64,6 +64,7 @@ if [[ -n "$BUILD_IMAGE" ]]; then
 fi
 
 mkdir -p "$ARTIFACTS"
+ARTIFACTS="$(cd "$ARTIFACTS" && pwd)"
 
 # uid/gid is a runtime concern (not baked into the image) so images are
 # potentially reusable - run as the invoking user with a writable HOME.

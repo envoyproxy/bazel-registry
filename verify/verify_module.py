@@ -126,7 +126,11 @@ def fetch_source(version_dir, dest):
     log(f"Fetching source archive: {source['url']}")
     subprocess.run(
         ["curl", "-fsSL", "-o", str(tarball), source["url"]], check=True)
-    strip = ["--strip-components=1"] if source.get("strip_prefix") else []
+    strip_prefix = source.get("strip_prefix")
+    strip = (
+        [f"--strip-components={len(pathlib.PurePosixPath(strip_prefix).parts)}"]
+        if strip_prefix
+        else [])
     subprocess.run(
         ["tar", "-xf", str(tarball), "-C", str(archive)] + strip, check=True)
     overlay_dir = version_dir / "overlay"
