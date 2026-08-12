@@ -1,0 +1,6 @@
+{
+    "url": "https://github.com/keith/hermetic_android_toolchains/archive/c6a9f203fbe1d4e72ecfc8d6ea47b81c844435ff.tar.gz",
+    "integrity": "sha256-jovdpav966xUgaGTHIv5OMGtWxJMFk8ijbSoGQ6xX2E=",
+    "strip_prefix": "hermetic_android_toolchains-c6a9f203fbe1d4e72ecfc8d6ea47b81c844435ff",
+    "patch_strip": 1
+}
