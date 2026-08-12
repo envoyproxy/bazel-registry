@@ -8,6 +8,16 @@ on:
     branches:
     - main
   pull_request:
+  schedule:
+  - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      module:
+        description: Module to run (latest of every module if empty)
+        type: string
+      version:
+        description: Module version (latest of the module if empty)
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -18,48 +28,44 @@ jobs:
   request:
     runs-on: ubuntu-24.04
     outputs:
-      run: ${{ steps.filter.outputs.run }}
-      modules: ${{ steps.modules.outputs.output }}
+      entries: ${{ steps.select.outputs.entries }}
     steps:
-    - uses: envoyproxy/toolshed/actions/github/should-run@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
-      id: filter
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       with:
-        config: |
-          paths:
-          - modules/**
-          - .github/workflows/bazel-registry.yml
-          - .github/workflows/_bazel_registry.yml
-          - .github/workflows/registry_integrity.sh
-    - name: Find modules
-      uses: envoyproxy/toolshed/actions/bson@5291901f6f40a2246c78b89698ead70d39a2559b  # actions-v0.4.20
-      id: modules
-      with:
-        input: |
-          registry_path: modules
-          metadata_file: metadata.json
-        filter: |
-          .
-          | "OUTPUT=$(find \(.registry_path) -name \(.metadata_file))"
-          | bash::output
-        result-filter: |
-          split("\n")
-          | map(
-              select(length > 0)
-              | split("/")[1])
-        result-filter-options: -sRc
+        fetch-depth: 0
+    - name: Test module selection
+      run: python3 .github/workflows/registry_select_test.py
+    - name: Select modules
+      id: select
+      env:
+        DIFF_BASE: >-
+          ${{ github.event_name == 'pull_request'
+              && format('origin/{0}', github.base_ref)
+              || github.event.before }}
+        INPUT_MODULE: ${{ inputs.module }}
+        INPUT_VERSION: ${{ inputs.version }}
+      run: |
+        entries="$(python3 .github/workflows/registry_select.py \
+            --event="${GITHUB_EVENT_NAME}" \
+            --base="${DIFF_BASE}" \
+            --module="${INPUT_MODULE}" \
+            --version="${INPUT_VERSION}")"
+        echo "Selected: ${entries}"
+        echo "entries=${entries}" >> "$GITHUB_OUTPUT"
 
   modules:
     needs: request
     if: >-
-      fromJSON(needs.request.outputs.run)
-      && needs.request.outputs.modules != '[]'
+      needs.request.outputs.entries != '[]'
     uses: ./.github/workflows/_bazel_registry.yml
     with:
       module: ${{ matrix.module }}
+      version: ${{ matrix.version }}
     strategy:
       fail-fast: false
+      max-parallel: 10
       matrix:
-        module: ${{ fromJSON(needs.request.outputs.modules) }}
+        include: ${{ fromJSON(needs.request.outputs.entries) }}
 
   status:
     runs-on: ubuntu-24.04
