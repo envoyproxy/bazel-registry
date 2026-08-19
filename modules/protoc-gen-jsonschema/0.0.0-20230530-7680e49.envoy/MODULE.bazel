@@ -1,0 +1,30 @@
+module(
+    name = "protoc-gen-jsonschema",
+    version = "0.0.0-20230530-7680e49.envoy",
+    compatibility_level = 1,
+    repo_name = "com_github_chrusty_protoc_gen_jsonschema",
+)
+
+bazel_dep(name = "gazelle", version = "0.46.0", repo_name = "bazel_gazelle")
+bazel_dep(name = "protobuf", version = "33.4.envoy", repo_name = "com_google_protobuf")
+bazel_dep(name = "rules_go", version = "0.59.0", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "rules_proto", version = "7.1.0")
+
+go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk")
+go_sdk.download(version = "1.24.0")
+
+go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps")
+go_deps.from_file(go_mod = "//:go.mod")
+
+use_repo(
+    go_deps,
+    "com_github_alecthomas_jsonschema",
+    "com_github_envoyproxy_protoc_gen_validate",
+    "com_github_fatih_camelcase",
+    "com_github_iancoleman_orderedmap",
+    "com_github_iancoleman_strcase",
+    "com_github_sirupsen_logrus",
+    "com_github_stretchr_testify",
+    "com_github_xeipuuv_gojsonschema",
+    "org_golang_google_protobuf",
+)
