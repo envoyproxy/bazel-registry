@@ -1,0 +1,11 @@
+{
+    "homepage": "https://github.com/norbjd/protoc-gen-jsonschema",
+    "maintainers": [],
+    "repository": [
+        "github:norbjd/protoc-gen-jsonschema"
+    ],
+    "versions": [
+        "0.0.0-20230530-7680e49.envoy"
+    ],
+    "yanked_versions": {}
+}
