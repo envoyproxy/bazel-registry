@@ -1,0 +1,8 @@
+{
+    "url": "https://github.com/norbjd/protoc-gen-jsonschema/archive/7680e4998426e62b6896995ff73d4d91cc5fb13c.zip",
+    "integrity": "sha256-uj4xOxChtQpsEjLZlME/biPTZpvkrn/qE3YvQrs7Krw=",
+    "strip_prefix": "protoc-gen-jsonschema-7680e4998426e62b6896995ff73d4d91cc5fb13c",
+    "overlay": {
+        "MODULE.bazel": "sha256-0qnm91YKbDJz9S5SL0a/brUBmh3Q9pmRxqvmiAWZvCE="
+    }
+}
