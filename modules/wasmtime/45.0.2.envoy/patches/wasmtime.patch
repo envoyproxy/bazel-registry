@@ -1,0 +1,12 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 00ffde3..5380f12 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -43,6 +43,7 @@ path = "src/bin/wasmtime.rs"
+ doc = false
+ 
+ [dependencies]
++wasmtime-c-api = { path = "crates/c-api/artifact", version = "=45.0.2", features = ["cranelift"] }
+ wasmtime = { workspace = true, features = ['std'] }
+ wasmtime-cache = { workspace = true, optional = true }
+ wasmtime-cli-flags = { workspace = true }

@@ -3,6 +3,11 @@
     "integrity": "sha256-qVz1cAi4fb4c2roiDqWLdbsLUzaeFm/iHnKQEb0l6eg=",
     "strip_prefix": "wasmtime-45.0.2",
     "overlay": {
-        "BUILD.bazel": "sha256-S5V4MkimtNg0nvahmKZ49/B8/nnAHV3fmG6FU1VjAq0="
+        "BUILD.bazel": "sha256-S5V4MkimtNg0nvahmKZ49/B8/nnAHV3fmG6FU1VjAq0=",
+        "Cargo.lock": "sha256-Elc1GNhPnUAyXaOC17NyAbSM9K4ulFFeej4lKY0+XgQ="
+    },
+    "patch_strip": 1,
+    "patches": {
+        "wasmtime.patch": "sha256-y1tSxHSwPIANuvJ0iUjRChzmAogH34ONf4LKmDqNxZQ="
     }
 }
