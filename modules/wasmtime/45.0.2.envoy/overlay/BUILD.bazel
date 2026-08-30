@@ -91,6 +91,9 @@ rust_static_library(
     crate_features = ["cranelift"],
     crate_root = "crates/c-api/src/lib.rs",
     edition = "2021",
+    aliases = {
+        "@cu//:wasmtime-internal-c-api-macros": "wasmtime_c_api_macros",
+    },
     proc_macro_deps = [
         "@cu//:wasmtime-internal-c-api-macros",
     ],
