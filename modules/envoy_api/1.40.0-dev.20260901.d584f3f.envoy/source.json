@@ -1,0 +1,9 @@
+{
+    "url": "https://github.com/envoyproxy/envoy/archive/d584f3fcd0795544638dd025860109df4ef51a63.tar.gz",
+    "integrity": "sha256-dMJQ3ypaFkOK4OM1jbVXZJzpPwpXa6E1IfYbj9YyKXI=",
+    "strip_prefix": "envoy-d584f3fcd0795544638dd025860109df4ef51a63/api",
+    "patch_strip": 1,
+    "patches": {
+        "version.patch": "sha256-QOMe5cf6g0qtrYt6wSCJyZlmTNqw2Q7pZaJf2eyIBek="
+    }
+}

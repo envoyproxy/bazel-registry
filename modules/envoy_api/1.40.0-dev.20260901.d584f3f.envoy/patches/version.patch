@@ -1,0 +1,10 @@
+--- a/MODULE.bazel
++++ b/MODULE.bazel
+@@ -1,6 +1,6 @@
+ module(
+     name = "envoy_api",
+-    version = "1.40.0-dev",
++    version = "1.40.0-dev.20260901.d584f3f.envoy",
+     repo_name = "envoy_api",
+ )
+ 
