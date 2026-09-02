@@ -1,8 +1,8 @@
 """Kafka protocol message definitions from Apache Kafka."""
 
 module(
-    name = "kafka_message",
+    name = "kafka",
     version = "3.9.2.envoy",
-    bazel_compatibility = [">=7.2.1"],  # need support for "overlay" directory
+    bazel_compatibility = [">=7.2.1"],
     compatibility_level = 1,
 )
