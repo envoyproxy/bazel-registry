@@ -1,5 +1,5 @@
 {
-    "url": "https://github.com/envoyproxy/envoy/archive/7075b4b0d2db32753092cba192703e8c0742acc5.tar.gz",
-    "integrity": "sha256-qpUCMX1pFXT4D8lNbrr2PvNRrfKjyZT5bQk5ZwiXZaI=",
-    "strip_prefix": "envoy-7075b4b0d2db32753092cba192703e8c0742acc5/api"
+    "url": "https://github.com/envoyproxy/envoy/archive/16b0d47b09168314cebf27e86e0e74d4b3575be4.tar.gz",
+    "integrity": "sha256-gGiHWR2Waq0IA2E69o2YJsGKSb3YFiLjQD96RwRGnj8=",
+    "strip_prefix": "envoy-16b0d47b09168314cebf27e86e0e74d4b3575be4/api"
 }
