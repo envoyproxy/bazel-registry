@@ -5,11 +5,6 @@
         "github:lz4/lz4"
     ],
     "versions": [
-        "1.9.4",
-        "1.9.4.bcr.1",
-        "1.9.4.bcr.2",
-        "1.10.0",
-        "1.10.0.bcr.1",
         "1.10.0.bcr.2.envoy"
     ],
     "yanked_versions": {
