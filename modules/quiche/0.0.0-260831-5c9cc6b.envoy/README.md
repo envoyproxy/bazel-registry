@@ -38,6 +38,7 @@ Other:
 | Flag | Default | Envoy override |
 |------|---------|---------------|
 | `//:zlib` | `@zlib//:z` | `//bazel:zlib` (allows selecting zlib-ng) |
+| `//:ssl_lib` | `@boringssl//:ssl` | `@envoy//bazel:ssl` (keeps FIPS builds consistent) |
 
 ## Targets that cannot build standalone
 

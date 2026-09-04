@@ -63,6 +63,12 @@ label_flag(
 )
 
 label_flag(
+    name = "ssl_lib",
+    build_setting_default = "@boringssl//:ssl",
+    visibility = ["//visibility:public"],
+)
+
+label_flag(
     name = "quic_base_impl_lib",
     build_setting_default = ":quic_base_impl_lib_default",
 )
