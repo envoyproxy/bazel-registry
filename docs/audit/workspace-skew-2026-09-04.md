@@ -58,7 +58,7 @@ _none_
 |---|---|---|---|
 | aws-lc-fips | 1.66.2.envoy | envoy-patched upstream | - |
 | boost.headers | 1.89.0.envoy | envoy-patched upstream | root |
-| boringssl-source | 0.20260413.0.envoy | envoy-patched upstream | root |
+| boringssl-source | 0.20260413.0.envoy | envoy-patched upstream (same upstream as WORKSPACE `boringssl`) | root |
 | envoy | 1.40.0-dev.20260904.13144fb.envoy | envoy-owned | docs, mobile |
 | envoy-example-filter-cc | 0.2.6.envoy | envoy-owned | - |
 | envoy-example-wasm-cc | 0.2.6.envoy | envoy-owned | - |

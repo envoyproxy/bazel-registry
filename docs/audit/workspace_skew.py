@@ -234,12 +234,18 @@ def report(args):
         repo = gh_repo(mod["url"]) or gh_repo((mod["repository"] or "").replace(
             "github:", "https://github.com/") + "/")
         if repo:
-            by_repo.setdefault(repo, mod["name"])
+            by_repo.setdefault(repo, []).append(mod["name"])
         by_norm.setdefault(norm(mod["name"]), mod["name"])
 
-    pairs, unmapped = {}, []
+    pairs, unmapped, siblings = {}, [], {}
     for name, ws in sorted(ws_deps.items()):
-        mod = by_repo.get(gh_repo(ws["url"])) or by_norm.get(norm(name))
+        candidates = by_repo.get(gh_repo(ws["url"]), [])
+        mod = next((c for c in candidates if modules[c]["url"] == ws["url"]), None)
+        mod = mod or next((c for c in candidates if norm(c) == norm(name)), None)
+        mod = mod or (candidates[0] if candidates else by_norm.get(norm(name)))
+        for other in candidates:
+            if other != mod:
+                siblings[other] = name
         if mod and mod not in pairs:
             pairs[mod] = ws
         elif not mod:
@@ -266,6 +272,8 @@ def report(args):
         source = ("envoy-owned" if repo[0] in ("envoyproxy", "envoy")
                   else "envoy-patched upstream" if mod["patched"] or ".envoy" in mod["version"]
                   else "upstream mirror")
+        if name in siblings:
+            source += f" (same upstream as WORKSPACE `{siblings[name]}`)"
         registry_only.append((name, mod["version"], source, ", ".join(bazel_deps.get(name, [])) or "-"))
     no_repo = []
     for ws in sorted(unmapped, key=lambda w: w["name"]):
