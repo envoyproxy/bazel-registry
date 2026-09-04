@@ -5,7 +5,8 @@
         "github:google/quiche"
     ],
     "versions": [
-        "0.0.0-260831-5c9cc6b.envoy"
+        "0.0.0-260831-5c9cc6b.envoy",
+        "0.0.0-260831-5c9cc6b.envoy.1"
     ],
     "yanked_versions": {}
 }
