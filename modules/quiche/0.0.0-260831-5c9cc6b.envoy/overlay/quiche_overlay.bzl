@@ -10,7 +10,7 @@ quiche_copts = [
 
 _EXTERNAL_DEPS = {
     "nghttp2": ["@nghttp2//:nghttp2"],
-    "ssl": ["@boringssl//:ssl"],
+    "ssl": ["//:ssl_lib"],
 }
 
 def _expand_external_deps(external_deps):
