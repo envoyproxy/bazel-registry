@@ -64,7 +64,8 @@ def literal(node):
 
 def parse_spec(src):
     for node in ast.parse(src).body:
-        if isinstance(node, ast.Assign) and node.targets[0].id == "REPOSITORY_LOCATIONS_SPEC":
+        if (isinstance(node, ast.Assign)
+                and getattr(node.targets[0], "id", None) == "REPOSITORY_LOCATIONS_SPEC"):
             return literal(node.value)
     return {}
 
@@ -128,9 +129,9 @@ def sri(hexdigest):
         return ""
 
 
-def version_tuple(ref):
-    parts = re.findall(r"\d+", ref or "")
-    return tuple(int(p) for p in parts) if parts else None
+def version_tuple(ref, width=6):
+    parts = [int(p) for p in re.findall(r"\d+", ref or "")]
+    return tuple(parts + [0] * (width - len(parts)))[:width] if parts else None
 
 
 def compare(org, repo, base, head, token, cache):
@@ -179,7 +180,8 @@ def classify(ws, reg, token, cache, budget):
             if status == "identical":
                 return "unordered", ("same commit, different url", short(ws_ref), short(reg_ref))
         return "unordered", ("not compared (github budget)", short(ws_ref), short(reg_ref))
-    if ws_ref and reg_ref and SHA_RE.match(ws_ref or "") and ws_ref.startswith(reg_ref):
+    if (ws_ref and reg_ref and SHA_RE.match(ws_ref)
+            and re.fullmatch(r"[0-9a-f]{7,}", reg_ref) and ws_ref.startswith(reg_ref)):
         return "unordered", ("same commit (registry url uses a short sha)",
                              short(ws_ref), reg_ref)
     ws_v, reg_v = version_tuple(ws_ref), version_tuple(reg_ref)
@@ -203,8 +205,10 @@ def classify(ws, reg, token, cache, budget):
     return "unordered", ("not orderable", short(ws_ref), short(reg_ref))
 
 
-def in_bcr(name):
-    return fetch(BCR.format(name=name)) is not None
+def in_bcr(name, _cache={}):
+    if name not in _cache:
+        _cache[name] = fetch(BCR.format(name=name)) is not None
+    return _cache[name]
 
 
 def table(rows, header):
@@ -223,7 +227,10 @@ def report(args):
     for label, path in MODULE_FILES.items():
         src = fetch(RAW.format(sha=args.envoy_sha, path=path), token)
         for call in re.findall(r"bazel_dep\([^)]*\)", src or ""):
-            name = re.search(r'name\s*=\s*"([^"]+)"', call).group(1)
+            match = re.search(r'name\s*=\s*"([^"]+)"', call)
+            if not match:
+                continue
+            name = match.group(1)
             bazel_deps.setdefault(name, []).append(label)
             repo_name = re.search(r'repo_name\s*=\s*"([^"]+)"', call)
             aliases[norm(repo_name.group(1) if repo_name else name)] = name
@@ -294,7 +301,7 @@ def report(args):
     counts["registry-only"] = len(registry_only)
     counts["workspace-only"] = len(workspace_only)
     counts["unmapped"] = len(no_repo)
-    skew_header = ["module", "WORKSPACE", "registry", "delta", "in envoy MODULE.bazel?"]
+    skew_header = ["module", "WORKSPACE", "registry", "delta", "in root MODULE.bazel?"]
     print(f"""# WORKSPACE ↔ registry version skew audit
 
 envoy @ {args.envoy_sha} ({args.date})

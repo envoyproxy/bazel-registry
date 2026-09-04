@@ -16,14 +16,14 @@ registry @ bed06c78cb1ea901164f4d248c3e5167f720e068
 | workspace-only | 48 |
 
 ## registry-behind  ← fix these
-| module | WORKSPACE | registry | delta | in envoy MODULE.bazel? |
+| module | WORKSPACE | registry | delta | in root MODULE.bazel? |
 |---|---|---|---|---|
 | protoc-gen-validate | v1.3.3 | v1.3.0 | version bump | yes |
 | quiche | 5c9cc6b (2026-08-31) | 0140828 (2026-08-24) | 21 commits | yes |
 | thrift | v0.24.0 | v0.22.0 | version bump | yes |
 
 ## registry-ahead  ← WORKSPACE should catch up, or registry was bumped deliberately
-| module | WORKSPACE | registry | delta | in envoy MODULE.bazel? |
+| module | WORKSPACE | registry | delta | in root MODULE.bazel? |
 |---|---|---|---|---|
 | emsdk | 4.0.6 | c0bb220 | module version 4.0.23.envoy vs workspace 4.0.6 | yes |
 
@@ -31,7 +31,7 @@ registry @ bed06c78cb1ea901164f4d248c3e5167f720e068
 _none_
 
 ## unordered
-| module | WORKSPACE | registry | delta | in envoy MODULE.bazel? |
+| module | WORKSPACE | registry | delta | in root MODULE.bazel? |
 |---|---|---|---|---|
 | boringssl-fips | 0.20260413.0 | 0.20260413.0 | same version, different url | yes |
 | cel-cpp | v0.14.0 | 439003a | same version (0.14.0), registry pins a commit | yes |
