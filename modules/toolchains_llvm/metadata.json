@@ -5,7 +5,6 @@
         "github:bazel-contrib/toolchains_llvm"
     ],
     "versions": [
-        "1.6.0.envoy",
         "1.8.0.envoy",
         "1.9.0.envoy"
     ],
