@@ -10,7 +10,7 @@
     "github:envoyproxy/envoy"
   ],
   "versions": [
-    "1.40.0-dev.20260903.16b0d47.envoy"
+    "1.40.0-dev.20260904.13144fb.envoy"
   ],
   "yanked_versions": {}
 }
