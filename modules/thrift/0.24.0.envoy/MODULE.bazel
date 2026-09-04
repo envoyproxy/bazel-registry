@@ -1,6 +1,6 @@
 module(
     name = "thrift",
-    version = "0.22.0.envoy",
+    version = "0.24.0.envoy",
     compatibility_level = 1,
 )
 
