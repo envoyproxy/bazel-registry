@@ -4,4 +4,4 @@ module(
     compatibility_level = 1,
 )
 
-bazel_dep(name = "protobuf", version = "33.4.envoy")
+bazel_dep(name = "protobuf", version = "35.1.bcr.envoy")
