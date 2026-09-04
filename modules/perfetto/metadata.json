@@ -5,7 +5,6 @@
     "github:google/perfetto"
   ],
   "versions": [
-    "53.0.envoy",
     "57.2.envoy"
   ],
   "yanked_versions": {}
