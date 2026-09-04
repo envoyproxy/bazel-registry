@@ -5,7 +5,7 @@
         "github:apache/thrift"
     ],
     "versions": [
-        "0.22.0.envoy"
+        "0.24.0.envoy"
     ],
     "yanked_versions": {}
 }
