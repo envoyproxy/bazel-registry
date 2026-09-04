@@ -4,6 +4,6 @@
   "strip_prefix": "tcmalloc-12f255231938d30493186b0a037feedd70f5a1c1",
   "patch_strip": 1,
   "patches": {
-    "tcmalloc.patch": "sha256-1WmNb5vORRCGN3KhaK/xlwOyV+ki7RXdYayFfYZ0+O0="
+    "tcmalloc.patch": "sha256-m3wb1bxvZlcbub3EsQxVmkTT5k6kJ0eOPwCzKonp65Y="
   }
 }
