@@ -1,0 +1,5 @@
+module(
+    name = "sequoia-sq",
+    version = "1.4.0.envoy",
+    compatibility_level = 1,
+)
