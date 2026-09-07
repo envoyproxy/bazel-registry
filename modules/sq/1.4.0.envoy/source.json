@@ -15,6 +15,7 @@
     "crate-patches/sequoia-keystore-backend-hermetic-paths.patch": "sha256-XRsRzmFIyLgGUwV1esk26kcVyWgAMiZF8KccWNprkkI=",
     "crate-patches/sequoia-keystore-hermetic-capnp.patch": "sha256-vuEa3tFNYWR3MTWIzLvB4kJxdpTIQdGaJK8dpi+gV8E=",
     "defs.bzl": "sha256-X0y2ijwPpWNgAmbIXAqZHIy62zApEtCjemq4Oa0Y544=",
-    "toolchains/BUILD.bazel": "sha256-1Wp7UJDPlwvmxalkc8ugxCUlAOyxFb7cyPJFosKysFc="
+    "prebuilt.bzl": "sha256-Wb8rJjrIm2JenkJeftqmE8JudcILaJMEL5njiwxiz68=",
+    "toolchains/BUILD.bazel": "sha256-2YYPZm/ZB8XXIqrraRrmcFNU+deIPVHFRaqMGJpGWe8="
   }
 }
