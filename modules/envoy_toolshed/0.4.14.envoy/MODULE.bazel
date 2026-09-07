@@ -1,21 +1,23 @@
 module(
     name = "envoy_toolshed",
-    version = "0.4.13.envoy",
+    version = "0.4.14.envoy",
     bazel_compatibility = [">=7.2.1"],
 )
 
 bazel_dep(name = "abseil-cpp", version = "20260107.1")
 bazel_dep(name = "aspect_bazel_lib", version = "2.22.0")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
+bazel_dep(name = "boringssl", version = "0.20260413.0")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_cc", version = "0.2.17")
 bazel_dep(name = "v8", version = "14.6.202.10.envoy")
 bazel_dep(name = "rules_foreign_cc", version = "0.15.1")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_python", version = "2.2.0")
+bazel_dep(name = "rules_rust", version = "0.69.0.envoy")
 bazel_dep(name = "rules_shell", version = "0.8.0")
+bazel_dep(name = "sq", version = "1.4.0.envoy")
 bazel_dep(name = "protobuf", version = "35.1.bcr.envoy", repo_name = "com_google_protobuf")
-
 bazel_dep(name = "toolchains_llvm", version = "1.9.0.envoy", dev_dependency = True)
 
 bazel_lib_toolchains = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
@@ -116,6 +118,12 @@ use_repo(wee8_prebuilt_ext, "wee8_prebuilt_x86_64", "wee8_prebuilt_x86_64_libstd
 # grcov_ext.setup()
 # use_repo(grcov_ext, "grcov")
 
+# Setup glint for code style linting - example for downstream consumers
+# Uncomment to use in your MODULE.bazel:
+# glint_ext = use_extension("@envoy_toolshed//format/glint:extensions.bzl", "glint_extension")
+# glint_ext.setup(bins_release_version = "0.1.21")
+# use_repo(glint_ext, "glint")
+
 # This needs to be before llvm to win in transitionsj
 register_toolchains(
     "//toolchains/gcc:linux_x64_toolchain",
@@ -172,6 +180,12 @@ use_repo(llvm, "llvm_toolchain")
 
 register_toolchains("@llvm_toolchain//:all", dev_dependency = True)
 
+# Stub OpenPGP signer used by //pgp/test analysis tests. It is registered first
+# in dev mode so those tests resolve the stub instead of the default `sq` signer.
+register_toolchains("//pgp/test:stub_toolchain", dev_dependency = True)
+
+register_toolchains("//pgp:sq_toolchain")
+
 libcxx_ext = use_extension("//compile:extensions.bzl", "libcxx_extension", dev_dependency = True)
 use_repo(libcxx_ext, "llvm_libcxx_aarch64", "llvm_libcxx_x86_64")
 
@@ -190,3 +204,4 @@ use_repo(llvm_minimal_ext, "llvm_minimal_linux_x64", "llvm_minimal_linux_arm64",
 
 llvm_toolchain_alias_ext = use_extension("//compile:extensions.bzl", "llvm_toolchain_alias_extension", dev_dependency = True)
 use_repo(llvm_toolchain_alias_ext, "llvm_toolchain_llvm")
+
