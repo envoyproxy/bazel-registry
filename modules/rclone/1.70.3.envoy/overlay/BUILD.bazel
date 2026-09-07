@@ -34,11 +34,14 @@ selects.config_setting_group(
 
 alias(
     name = "rclone",
-    actual = select({
-        ":linux_x86_64": "@rclone_linux-amd64//:rclone",
-        ":linux_arm64": "@rclone_linux-arm64//:rclone",
-        ":macos_x86_64": "@rclone_osx-amd64//:rclone",
-        ":macos_arm64": "@rclone_osx-arm64//:rclone",
-    }),
+    actual = select(
+        {
+            ":linux_x86_64": "@rclone_linux-amd64//:rclone",
+            ":linux_arm64": "@rclone_linux-arm64//:rclone",
+            ":macos_x86_64": "@rclone_osx-amd64//:rclone",
+            ":macos_arm64": "@rclone_osx-arm64//:rclone",
+        },
+        no_match_error = "No prebuilt rclone binary for this platform. Supported platforms: linux/x86_64, linux/arm64, macos/x86_64, macos/arm64.",
+    ),
     visibility = ["//visibility:public"],
 )
