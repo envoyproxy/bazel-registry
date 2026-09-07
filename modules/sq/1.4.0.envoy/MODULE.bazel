@@ -78,4 +78,21 @@ crate.from_cargo(
 )
 use_repo(crate, "sequoia_sq_crate_index")
 
-register_toolchains("//toolchains:from_source")
+sq_prebuilt = use_extension("//:prebuilt.bzl", "sq_prebuilt")
+use_repo(sq_prebuilt, "sq_prebuilt_linux_x86_64", "sq_prebuilt_linux_aarch64")
+
+# `sq` is used as an *exec*-side tool (it signs things during the build), so
+# toolchain resolution is keyed off the exec platform via
+# `exec_compatible_with`, not `target_compatible_with`. Registration order is
+# the fallback mechanism: prebuilt toolchains are listed first so they win
+# whenever the exec platform is linux/x86_64 or linux/aarch64, and
+# `from_source` is listed last so it only applies where no prebuilt tarball
+# is published (eg macOS). To force the from-source build regardless of exec
+# platform (eg to test it, or if a prebuilt is ever suspect), a consumer can
+# pass `--extra_toolchains=@sq//toolchains:from_source`, which takes
+# precedence over toolchains registered by `register_toolchains`.
+register_toolchains(
+    "//toolchains:prebuilt_linux_x86_64",
+    "//toolchains:prebuilt_linux_aarch64",
+    "//toolchains:from_source",
+)
