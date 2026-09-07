@@ -1,0 +1,11 @@
+{
+    "homepage": "https://rclone.org",
+    "maintainers": [],
+    "repository": [
+        "github:rclone/rclone"
+    ],
+    "versions": [
+        "1.70.3.envoy"
+    ],
+    "yanked_versions": []
+}
