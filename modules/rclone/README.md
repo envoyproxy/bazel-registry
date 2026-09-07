@@ -18,8 +18,8 @@ platform actually selected (lazy repo fetching).
    `source.json` (`https://github.com/rclone/rclone/archive/refs/tags/v<version>.tar.gz`).
 2. Update the four platform zip `sha256` values in `MODULE.bazel` (both the
    copy at `<version>/MODULE.bazel` and `<version>/overlay/MODULE.bazel`,
-   which must stay identical) from
-   `https://downloads.rclone.org/v<version>/SHA256SUMS`.
+   which must stay in sync aside from their file-specific header comments)
+   from `https://downloads.rclone.org/v<version>/SHA256SUMS`.
 3. Recompute the `integrity` of `overlay/BUILD.bazel` and
    `overlay/MODULE.bazel` in `source.json`
    (`openssl dgst -sha256 -binary <file> | base64`).

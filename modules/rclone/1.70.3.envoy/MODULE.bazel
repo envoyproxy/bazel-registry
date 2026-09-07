@@ -1,7 +1,6 @@
-# The top-level MODULE.bazel (1.70.3.envoy/MODULE.bazel) and this overlay
-# copy must stay byte-for-byte identical: Bazel's registry client fetches and
-# integrity-checks the top-level copy directly (without extracting the
-# source archive/overlay) to resolve the module graph.
+# This is the registry's top-level module file for bzlmod resolution; keep
+# it in sync with overlay/MODULE.bazel, which replaces MODULE.bazel inside the
+# fetched rclone source archive. See modules/rclone/README.md when bumping.
 module(
     name = "rclone",
     version = "1.70.3.envoy",
