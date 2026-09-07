@@ -4,6 +4,6 @@
   "strip_prefix": "sequoia-sq-v1.4.0",
   "overlay": {
     "BUILD.bazel": "sha256-VW78Ja07NvERUtVD5iuPacrhWQUBU0cUO6PLJqtTXK0=",
-    "MODULE.bazel": "sha256-R6BbhuET58/rBK0IFsifVYQ+MsL2SwOeba4Lcxm9shA="
+    "MODULE.bazel": "sha256-c3S7rZFXrjvPtVLj0YDUN0K7TqU/aUfSIIX9AgwN6Wg="
   }
 }
