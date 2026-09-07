@@ -4,6 +4,6 @@
     "strip_prefix": "rclone-1.70.3",
     "overlay": {
         "BUILD.bazel": "sha256-wrZZCTi5PzXpm3l9xv7sTivsYcpFvedvbh2FRhfzv44=",
-        "MODULE.bazel": "sha256-T/OIKDOzmzK0DyblfcplhQzIhNXAxBgPltBo2qB+Cv0="
+        "MODULE.bazel": "sha256-Bz/usw95HHRXr2lgYHzF8ZjXMkFMWfX66Tv0PS2naSo="
     }
 }

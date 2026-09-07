@@ -1,3 +1,6 @@
+# Keep this file byte-for-byte identical to overlay/MODULE.bazel: Bazel's
+# registry client fetches and integrity-checks this top-level copy directly
+# (without extracting the source archive/overlay) to resolve the module graph.
 module(
     name = "rclone",
     version = "1.70.3.envoy",
