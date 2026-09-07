@@ -3,7 +3,7 @@
     "integrity": "sha256-CyX7nwyyaIPPqIVXbds0J2VkoeIk7cWqyrgm+boiF50=",
     "strip_prefix": "rclone-1.70.3",
     "overlay": {
-        "BUILD.bazel": "sha256-qlUdDOdkhMH7JggsRdXDf78RQE2WZGv0gV1ct5cx8G8=",
+        "BUILD.bazel": "sha256-ygIs5d8dU9CAO/ymdVg/AWZzSo4mSxf8ou4pTbVZ8Qk=",
         "MODULE.bazel": "sha256-T/OIKDOzmzK0DyblfcplhQzIhNXAxBgPltBo2qB+Cv0="
     }
 }

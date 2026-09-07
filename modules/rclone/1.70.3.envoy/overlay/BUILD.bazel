@@ -1,6 +1,6 @@
-load("@bazel_skylib//rules:config_setting_group.bzl", "config_setting_group")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 
-config_setting_group(
+selects.config_setting_group(
     name = "linux_x86_64",
     match_all = [
         "@platforms//os:linux",
@@ -8,7 +8,7 @@ config_setting_group(
     ],
 )
 
-config_setting_group(
+selects.config_setting_group(
     name = "linux_arm64",
     match_all = [
         "@platforms//os:linux",
@@ -16,7 +16,7 @@ config_setting_group(
     ],
 )
 
-config_setting_group(
+selects.config_setting_group(
     name = "macos_x86_64",
     match_all = [
         "@platforms//os:macos",
@@ -24,7 +24,7 @@ config_setting_group(
     ],
 )
 
-config_setting_group(
+selects.config_setting_group(
     name = "macos_arm64",
     match_all = [
         "@platforms//os:macos",
