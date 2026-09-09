@@ -1,0 +1,11 @@
+{
+    "homepage": "https://github.com/bazelbuild/rules_swift",
+    "maintainers": [],
+    "repository": [
+        "github:bazelbuild/rules_swift"
+    ],
+    "versions": [
+        "2.5.0.envoy"
+    ],
+    "yanked_versions": {}
+}
