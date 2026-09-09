@@ -213,9 +213,8 @@ cc_library(
         "event_tagging.c",
         "evrpc.c",
         "http.c",
-        # sha1.c requires LITTLE_ENDIAN or BIG_ENDIAN to be defined; the
-        # per-platform event2-config_*.h headers supply them where the libc
-        # does not.  See event2-config_android.h.
+        # sha1.c requires LITTLE_ENDIAN or BIG_ENDIAN; see event2-config_android.h
+        # and the Windows local_defines below.
         "sha1.c",
         "ws.c",
     ],
@@ -225,6 +224,11 @@ cc_library(
         "@platforms//os:windows": [
             "shell32.lib",
         ],
+        "//conditions:default": [],
+    }),
+    # Match the byte order supplied by the CMake build for sha1.c on Windows.
+    local_defines = select({
+        "@platforms//os:windows": ["LITTLE_ENDIAN=1"],
         "//conditions:default": [],
     }),
     strip_include_prefix = "include",

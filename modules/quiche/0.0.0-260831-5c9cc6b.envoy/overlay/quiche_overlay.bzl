@@ -6,7 +6,13 @@ quiche_copts = [
     "-Wno-old-style-cast",
     # Envoy build should not fail if a dependency has a warning.
     "-Wno-error",
-]
+] + select({
+    # Envoy platform headers include windows.h before winsock2.h.
+    "@platforms//os:windows": [
+        "-DWIN32_LEAN_AND_MEAN",
+    ],
+    "//conditions:default": [],
+})
 
 _EXTERNAL_DEPS = {
     "nghttp2": ["@nghttp2//:nghttp2"],
