@@ -48,41 +48,41 @@ cc_binary(
 
 ##############################################################################
 # Stage 2: Run DynASM preprocessing to generate buildvm_arch.h
+#
+# Unconditional per-architecture genrules avoid the cross-compilation bug
+# where a select() inside a genrule consumed as a tool (via exec transition)
+# resolves to the HOST platform, picking the wrong .dasc file.
 ##############################################################################
 
+_DYNASM_SRCS = glob([
+    "dynasm/*.lua",
+    "dynasm/*.h",
+]) + glob([
+    "src/lj_*.h",
+])
+
 genrule(
-    name = "buildvm_arch_h",
-    srcs = select({
-        ":linux_x86_64": ["src/vm_x64.dasc"],
-        ":linux_arm64": ["src/vm_arm64.dasc"],
-        ":macos_x86_64": ["src/vm_x64.dasc"],
-        ":macos_arm64": ["src/vm_arm64.dasc"],
-    }) + glob([
-        "dynasm/*.lua",
-        "dynasm/*.h",
-    ]) + glob([
-        "src/lj_*.h",
-    ]),
-    outs = ["buildvm_arch.h"],
-    cmd = select({
-        ":linux_x86_64": """
-            $(location :minilua) $(location dynasm/dynasm.lua) -D X64 -D JIT -D FFI -D VER=21 -D P64 -o $@ $(location src/vm_x64.dasc)
-        """,
-        ":linux_arm64": """
-            $(location :minilua) $(location dynasm/dynasm.lua) -D ARM64 -D JIT -D FFI -D VER=21 -D ENDIAN_LE -D P64 -D DUALNUM -o $@ $(location src/vm_arm64.dasc)
-        """,
-        ":macos_x86_64": """
-            $(location :minilua) $(location dynasm/dynasm.lua) -D X64 -D JIT -D FFI -D VER=21 -D P64 -o $@ $(location src/vm_x64.dasc)
-        """,
-        ":macos_arm64": """
-            $(location :minilua) $(location dynasm/dynasm.lua) -D ARM64 -D JIT -D FFI -D VER=21 -D ENDIAN_LE -D P64 -D DUALNUM -o $@ $(location src/vm_arm64.dasc)
-        """,
-    }),
+    name = "buildvm_arch_h_x64",
+    srcs = ["src/vm_x64.dasc"] + _DYNASM_SRCS,
+    outs = ["_x64/buildvm_arch.h"],
+    cmd = "$(location :minilua) $(location dynasm/dynasm.lua) -D X64 -D JIT -D FFI -D VER=21 -D P64 -o $@ $(location src/vm_x64.dasc)",
+    tools = [":minilua"],
+)
+
+genrule(
+    name = "buildvm_arch_h_arm64",
+    srcs = ["src/vm_arm64.dasc"] + _DYNASM_SRCS,
+    outs = ["_arm64/buildvm_arch.h"],
+    cmd = "$(location :minilua) $(location dynasm/dynasm.lua) -D ARM64 -D JIT -D FFI -D VER=21 -D ENDIAN_LE -D P64 -D DUALNUM -o $@ $(location src/vm_arm64.dasc)",
     tools = [":minilua"],
 )
 
 ##############################################################################
-# Stage 3: Build buildvm (host tool)
+# Stage 3: Build per-architecture buildvm (host tools)
+#
+# Each variant is compiled with its architecture's buildvm_arch.h.  Even
+# though both run on the host, they generate code for their respective
+# target architectures.
 ##############################################################################
 
 genrule(
@@ -92,41 +92,64 @@ genrule(
     cmd = "sed -e '/#error/d' $(location src/luajit_rolling.h) > $@",
 )
 
+_BUILDVM_SRCS = [
+    "src/host/buildvm.c",
+    "src/host/buildvm_asm.c",
+    "src/host/buildvm_peobj.c",
+    "src/host/buildvm_lib.c",
+    "src/host/buildvm_fold.c",
+    "src/lua.h",
+    "src/lualib.h",
+    "src/lauxlib.h",
+    "src/luaconf.h",
+    ":luajit_h",
+] + glob([
+    "src/lj_*.h",
+    "src/host/*.h",
+    "dynasm/*.h",
+])
+
+_BUILDVM_COPTS = [
+    "-O2",
+    "-fomit-frame-pointer",
+]
+
+_BUILDVM_INCLUDES = [
+    "src",
+    "src/host",
+    "dynasm",
+]
+
+_BUILDVM_DEFINES = [
+    "LUAJIT_ENABLE_LUA52COMPAT",
+]
+
 cc_binary(
-    name = "buildvm",
-    srcs = [
-        "src/host/buildvm.c",
-        "src/host/buildvm_asm.c",
-        "src/host/buildvm_peobj.c",
-        "src/host/buildvm_lib.c",
-        "src/host/buildvm_fold.c",
-        ":buildvm_arch_h",
-        "src/lua.h",
-        "src/lualib.h",
-        "src/lauxlib.h",
-        "src/luaconf.h",
-        ":luajit_h",
-    ] + glob([
-        "src/lj_*.h",
-        "src/host/*.h",
-        "dynasm/*.h",
-    ]),
-    copts = [
-        "-O2",
-        "-fomit-frame-pointer",
-    ],
-    includes = [
-        "src",
-        "src/host",
-        "dynasm",
-    ],
-    local_defines = [
-        "LUAJIT_ENABLE_LUA52COMPAT",
-    ],
+    name = "buildvm_x64",
+    srcs = _BUILDVM_SRCS + [":buildvm_arch_h_x64"],
+    copts = _BUILDVM_COPTS,
+    includes = _BUILDVM_INCLUDES + ["_x64"],
+    local_defines = _BUILDVM_DEFINES,
+)
+
+cc_binary(
+    name = "buildvm_arm64",
+    srcs = _BUILDVM_SRCS + [":buildvm_arch_h_arm64"],
+    copts = _BUILDVM_COPTS,
+    includes = _BUILDVM_INCLUDES + ["_arm64"],
+    local_defines = _BUILDVM_DEFINES + ["LUAJIT_TARGET=LUAJIT_ARCH_ARM64"],
 )
 
 ##############################################################################
 # Stage 4: Run buildvm to generate headers and VM assembly
+#
+# ALL outputs must use the target-architecture buildvm variant.  The select
+# in tools evaluates in TARGET config (before exec transition), so the
+# correct variant is chosen even when cross-compiling.
+#
+# Even "header-only" outputs (bcdef, ffdef, etc.) contain architecture-
+# specific data such as bytecode handler offsets (lj_bc_ofs[]) that must
+# match the target VM assembly.
 ##############################################################################
 
 LJLIB_C = [
@@ -144,57 +167,111 @@ LJLIB_C = [
     "src/lib_buffer.c",
 ]
 
-# VM assembly (lj_vm.S)
 genrule(
     name = "lj_vm_s",
     outs = ["lj_vm.S"],
     cmd = select({
-        ":linux_x86_64": "$(location :buildvm) -m elfasm -o $@",
-        ":linux_arm64": "$(location :buildvm) -m elfasm -o $@",
-        ":macos_x86_64": "$(location :buildvm) -m machasm -o $@",
-        ":macos_arm64": "$(location :buildvm) -m machasm -o $@",
+        ":linux_x86_64": "$(location :buildvm_x64) -m elfasm -o $@",
+        ":linux_arm64": "$(location :buildvm_arm64) -m elfasm -o $@",
+        ":macos_x86_64": "$(location :buildvm_x64) -m machasm -o $@",
+        ":macos_arm64": "$(location :buildvm_arm64) -m machasm -o $@",
     }),
-    tools = [":buildvm"],
+    tools = select({
+        ":linux_x86_64": [":buildvm_x64"],
+        ":linux_arm64": [":buildvm_arm64"],
+        ":macos_x86_64": [":buildvm_x64"],
+        ":macos_arm64": [":buildvm_arm64"],
+    }),
 )
 
 genrule(
     name = "lj_bcdef_h",
     srcs = LJLIB_C,
     outs = ["lj_bcdef.h"],
-    cmd = "$(location :buildvm) -m bcdef -o $@ $(SRCS)",
-    tools = [":buildvm"],
+    cmd = select({
+        ":linux_x86_64": "$(location :buildvm_x64) -m bcdef -o $@ $(SRCS)",
+        ":linux_arm64": "$(location :buildvm_arm64) -m bcdef -o $@ $(SRCS)",
+        ":macos_x86_64": "$(location :buildvm_x64) -m bcdef -o $@ $(SRCS)",
+        ":macos_arm64": "$(location :buildvm_arm64) -m bcdef -o $@ $(SRCS)",
+    }),
+    tools = select({
+        ":linux_x86_64": [":buildvm_x64"],
+        ":linux_arm64": [":buildvm_arm64"],
+        ":macos_x86_64": [":buildvm_x64"],
+        ":macos_arm64": [":buildvm_arm64"],
+    }),
 )
 
 genrule(
     name = "lj_ffdef_h",
     srcs = LJLIB_C,
     outs = ["lj_ffdef.h"],
-    cmd = "$(location :buildvm) -m ffdef -o $@ $(SRCS)",
-    tools = [":buildvm"],
+    cmd = select({
+        ":linux_x86_64": "$(location :buildvm_x64) -m ffdef -o $@ $(SRCS)",
+        ":linux_arm64": "$(location :buildvm_arm64) -m ffdef -o $@ $(SRCS)",
+        ":macos_x86_64": "$(location :buildvm_x64) -m ffdef -o $@ $(SRCS)",
+        ":macos_arm64": "$(location :buildvm_arm64) -m ffdef -o $@ $(SRCS)",
+    }),
+    tools = select({
+        ":linux_x86_64": [":buildvm_x64"],
+        ":linux_arm64": [":buildvm_arm64"],
+        ":macos_x86_64": [":buildvm_x64"],
+        ":macos_arm64": [":buildvm_arm64"],
+    }),
 )
 
 genrule(
     name = "lj_libdef_h",
     srcs = LJLIB_C,
     outs = ["lj_libdef.h"],
-    cmd = "$(location :buildvm) -m libdef -o $@ $(SRCS)",
-    tools = [":buildvm"],
+    cmd = select({
+        ":linux_x86_64": "$(location :buildvm_x64) -m libdef -o $@ $(SRCS)",
+        ":linux_arm64": "$(location :buildvm_arm64) -m libdef -o $@ $(SRCS)",
+        ":macos_x86_64": "$(location :buildvm_x64) -m libdef -o $@ $(SRCS)",
+        ":macos_arm64": "$(location :buildvm_arm64) -m libdef -o $@ $(SRCS)",
+    }),
+    tools = select({
+        ":linux_x86_64": [":buildvm_x64"],
+        ":linux_arm64": [":buildvm_arm64"],
+        ":macos_x86_64": [":buildvm_x64"],
+        ":macos_arm64": [":buildvm_arm64"],
+    }),
 )
 
 genrule(
     name = "lj_recdef_h",
     srcs = LJLIB_C,
     outs = ["lj_recdef.h"],
-    cmd = "$(location :buildvm) -m recdef -o $@ $(SRCS)",
-    tools = [":buildvm"],
+    cmd = select({
+        ":linux_x86_64": "$(location :buildvm_x64) -m recdef -o $@ $(SRCS)",
+        ":linux_arm64": "$(location :buildvm_arm64) -m recdef -o $@ $(SRCS)",
+        ":macos_x86_64": "$(location :buildvm_x64) -m recdef -o $@ $(SRCS)",
+        ":macos_arm64": "$(location :buildvm_arm64) -m recdef -o $@ $(SRCS)",
+    }),
+    tools = select({
+        ":linux_x86_64": [":buildvm_x64"],
+        ":linux_arm64": [":buildvm_arm64"],
+        ":macos_x86_64": [":buildvm_x64"],
+        ":macos_arm64": [":buildvm_arm64"],
+    }),
 )
 
 genrule(
     name = "lj_folddef_h",
     srcs = ["src/lj_opt_fold.c"],
     outs = ["lj_folddef.h"],
-    cmd = "$(location :buildvm) -m folddef -o $@ $(SRCS)",
-    tools = [":buildvm"],
+    cmd = select({
+        ":linux_x86_64": "$(location :buildvm_x64) -m folddef -o $@ $(SRCS)",
+        ":linux_arm64": "$(location :buildvm_arm64) -m folddef -o $@ $(SRCS)",
+        ":macos_x86_64": "$(location :buildvm_x64) -m folddef -o $@ $(SRCS)",
+        ":macos_arm64": "$(location :buildvm_arm64) -m folddef -o $@ $(SRCS)",
+    }),
+    tools = select({
+        ":linux_x86_64": [":buildvm_x64"],
+        ":linux_arm64": [":buildvm_arm64"],
+        ":macos_x86_64": [":buildvm_x64"],
+        ":macos_arm64": [":buildvm_arm64"],
+    }),
 )
 
 ##############################################################################
