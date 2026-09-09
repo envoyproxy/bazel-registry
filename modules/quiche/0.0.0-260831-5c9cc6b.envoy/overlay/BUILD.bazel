@@ -99,11 +99,6 @@ label_flag(
 )
 
 label_flag(
-    name = "quiche_mem_slice_impl_lib",
-    build_setting_default = ":quiche_mem_slice_impl_lib_default",
-)
-
-label_flag(
     name = "quiche_platform_iovec_impl_lib",
     build_setting_default = ":quiche_platform_iovec_impl_lib_default",
 )
@@ -4719,7 +4714,6 @@ quiche_cc_library(
         ":quiche_common_platform_logging",
         ":quic_base_impl_lib",
         ":quiche_flags_impl_lib",
-        ":quiche_mem_slice_impl_lib",
         ":quiche_time_utils_impl_lib",
     ],
 )
@@ -4875,6 +4869,7 @@ quiche_cc_library(
     srcs = ["quiche/common/http/http_header_block.cc"],
     hdrs = ["quiche/common/http/http_header_block.h"],
     deps = [
+        ":quiche_common_callbacks",
         ":quiche_common_lib",
         ":quiche_common_platform_export",
         ":quiche_common_platform_logging",

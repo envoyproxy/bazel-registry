@@ -10,5 +10,5 @@
     "overlay": {
         "BUILD.bazel": "sha256-D0W3a1n1eDfUU+wYMDl+kwiSBPJjbm2bn36huxZza0s=",
         "quiche_overlay.bzl": "sha256-9UG0IONXc3eyE6nV21WO96HqkM0zISBGbyOZbEBVQ9Y="
-    }
+   }
 }
