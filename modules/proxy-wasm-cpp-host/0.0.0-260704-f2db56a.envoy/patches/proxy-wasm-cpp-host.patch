@@ -1,5 +1,5 @@
 diff --git a/BUILD b/BUILD
-index 0b53661..6555e7c 100644
+index 0b53661..12c08c8 100644
 --- a/BUILD
 +++ b/BUILD
 @@ -93,7 +93,7 @@ cc_library(
@@ -48,10 +48,10 @@ index 0b53661..6555e7c 100644
  )
  
 diff --git a/bazel/BUILD b/bazel/BUILD
-index 58b4aed..edc64ce 100644
+index 58b4aed..3c21a1e 100644
 --- a/bazel/BUILD
 +++ b/bazel/BUILD
-@@ -13,43 +13,90 @@
+@@ -13,60 +13,101 @@
  # limitations under the License.
  
  load("@bazel_skylib//lib:selects.bzl", "selects")
@@ -97,15 +97,15 @@ index 58b4aed..edc64ce 100644
      name = "engine_v8",
 -    values = {"define": "engine=v8"},
 +    flag_values = {"//bazel:engine": "v8"},
-+)
-+
-+# engine_wamr_interp matches both "wamr-interp" and the generic "wamr" alias.
-+config_setting(
-+    name = "_engine_wamr_interp_strict",
-+    flag_values = {"//bazel:engine": "wamr-interp"},
  )
  
++# engine_wamr_interp matches both "wamr-interp" and the generic "wamr" alias.
  config_setting(
++    name = "_engine_wamr_interp_strict",
++    flag_values = {"//bazel:engine": "wamr-interp"},
++)
++
++config_setting(
 +    name = "engine_wamr",
 +    flag_values = {"//bazel:engine": "wamr"},
 +)
@@ -141,15 +141,31 @@ index 58b4aed..edc64ce 100644
      name = "multiengine",
 -    values = {"define": "engine=multi"},
 +    flag_values = {"//bazel:engine": "multi"},
-+)
-+
-+config_setting(
+ )
+ 
+ config_setting(
+-    name = "requested_crypto_system",
+-    values = {"define": "crypto=system"},
 +    name = "engine_disabled",
 +    flag_values = {"//bazel:engine": "disabled"},
  )
  
  config_setting(
-@@ -78,3 +125,45 @@ v8_lib_no_pointer_compression(
+-    name = "linux_s390x",
+-    values = {"cpu": "s390x"},
++    name = "requested_crypto_system",
++    values = {"define": "crypto=system"},
+ )
+ 
+ selects.config_setting_group(
+     name = "crypto_system",
+     match_any = [
+         ":requested_crypto_system",
+-        ":linux_s390x",
+     ],
+ )
+ 
+@@ -78,3 +119,45 @@ v8_lib_no_pointer_compression(
  )
  
  exports_files(["tsan_suppressions.txt"])
