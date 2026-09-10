@@ -17,7 +17,6 @@ Source platform impls, overridden by Envoy to `//source/common/quic/platform:<na
 | `//:quiche_flags_impl_lib` | `:quiche_flags_impl_lib_default` |
 | `//:quiche_logging_impl_lib` | `:quiche_logging_impl_lib_default` |
 | `//:quiche_lower_case_string_impl_lib` | `:quiche_lower_case_string_impl_lib_default` |
-| `//:quiche_mem_slice_impl_lib` | `:quiche_mem_slice_impl_lib_default` |
 | `//:quiche_platform_iovec_impl_lib` | `:quiche_platform_iovec_impl_lib_default` |
 | `//:quiche_stack_trace_impl_lib` | `:quiche_stack_trace_impl_lib_default` |
 | `//:quiche_time_utils_impl_lib` | `:quiche_time_utils_impl_lib_default` |
@@ -44,7 +43,7 @@ Other:
 
 The following targets **cannot build standalone** (i.e. without root-module-supplied platform impl overrides):
 
-- **Any target that transitively links `quic_base_impl_lib` or `quiche_mem_slice_impl_lib`**: build/link will fail for targets that actually call into these abstractions. Envoy sets `--@quiche//:quic_base_impl_lib` and `--@quiche//:quiche_mem_slice_impl_lib` in its `.bazelrc`.
+- **Any target that transitively links `quic_base_impl_lib`**: build/link will fail for targets that actually call into these abstractions. Envoy sets `--@quiche//:quic_base_impl_lib` in its `.bazelrc`.
 
 - **Test targets depending on `quiche_test_impl_lib` / `quiche_test_helpers_impl_lib`**: these default to `empty_impl`. Any test that uses QUICHE's own test framework requires a real test impl to be injected.
 

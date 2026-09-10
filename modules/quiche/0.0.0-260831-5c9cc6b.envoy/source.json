@@ -8,7 +8,7 @@
         "delete-bazel-files.patch": "sha256-pPXq5RbMW5YpJdq/gcGZwmZghwRPIW3lMzlW4xd2x3U="
     },
     "overlay": {
-        "BUILD.bazel": "sha256-D0W3a1n1eDfUU+wYMDl+kwiSBPJjbm2bn36huxZza0s=",
+        "BUILD.bazel": "sha256-aVcMexUDIluJMoXaxCQHn9U3+i8OnNXehupo/ulk350=",
         "quiche_overlay.bzl": "sha256-9UG0IONXc3eyE6nV21WO96HqkM0zISBGbyOZbEBVQ9Y="
-    }
+   }
 }
