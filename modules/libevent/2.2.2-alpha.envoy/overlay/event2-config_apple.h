@@ -28,9 +28,6 @@
 /* Define to 1 if you have the `arc4random_buf' function. */
 #define EVENT__HAVE_ARC4RANDOM_BUF 1
 
-/* Define to 1 if you have the `arc4random_stir' function. */
-#define EVENT__HAVE_ARC4RANDOM_STIR 1
-
 /* Define to 1 if you have the `arc4random_addrandom' function. */
 /* This function is present but deprecated. */
 /* #undef EVENT__HAVE_ARC4RANDOM_ADDRANDOM */
@@ -202,9 +199,6 @@
 /* Define to 1 if you have the <poll.h> header file. */
 #define EVENT__HAVE_POLL_H 1
 
-/* Define to 1 if you have the `pread' function. */
-#define EVENT__HAVE_PREAD 1
-
 /* Define to 1 if you have the `port_create' function. */
 /* #undef EVENT__HAVE_PORT_CREATE */
 
@@ -213,9 +207,6 @@
 
 /* Define if we have pthreads on this system */
 #define EVENT__HAVE_PTHREADS 1
-
-/* Define to 1 if you have the `pthread_mutexattr_setprotocol' function. */
-#define EVENT__HAVE_PTHREAD_MUTEXATTR_SETPROTOCOL 1
 
 /* Define to 1 if you have the `putenv' function. */
 #define EVENT__HAVE_PUTENV 1
@@ -273,9 +264,6 @@
 
 /* Define to 1 if you have the `strsep' function. */
 #define EVENT__HAVE_STRSEP 1
-
-/* Define to 1 if you have the `strsignal' function. */
-#define EVENT__HAVE_STRSIGNAL 1
 
 /* Define to 1 if you have the `strtok_r' function. */
 #define EVENT__HAVE_STRTOK_R 1

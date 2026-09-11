@@ -273,9 +273,6 @@
 /* Define to 1 if you have the `_gmtime64' function. */
 #define EVENT__HAVE__GMTIME64 1
 
-/* Define to 1 if you have the `BCryptGenRandom' function. */
-#define EVENT__HAVE_BCRYPTGENRANDOM 1
-
 /* Define to 1 if the system has the type `struct addrinfo'. */
 #define EVENT__HAVE_STRUCT_ADDRINFO 1
 

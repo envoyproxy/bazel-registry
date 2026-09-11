@@ -46,12 +46,6 @@ exports_files([
     "LICENSE",
 ])
 
-# Match upstream CMake. MSVC and clang-cl already disable strict aliasing.
-LIBEVENT_COPTS = select({
-    "@platforms//os:windows": [],
-    "//conditions:default": ["-fno-strict-aliasing"],
-})
-
 cc_library(
     name = "event_core_private_headers",
     hdrs = [
@@ -158,12 +152,10 @@ cc_library(
         "//conditions:default": [],
     }),
     hdrs = EVENT_CORE_PUBLIC_HEADERS,
-    copts = LIBEVENT_COPTS,
     includes = ["include"],
     linkopts = select({
         "@platforms//os:windows": [
             "advapi32.lib",
-            "bcrypt.lib",
             "crypt32.lib",
             "iphlpapi.lib",
             "ws2_32.lib",
@@ -227,7 +219,6 @@ cc_library(
         "ws.c",
     ],
     hdrs = EVENT_EXTRA_PUBLIC_HEADERS,
-    copts = LIBEVENT_COPTS,
     includes = ["include"],
     linkopts = select({
         "@platforms//os:windows": [
@@ -288,7 +279,6 @@ cc_library(
         "bufferevent_openssl.c",
         "bufferevent_ssl.c",
     ],
-    copts = LIBEVENT_COPTS,
     includes = ["include"],
     tags = [
         "requires_openssl",
@@ -309,7 +299,6 @@ cc_library(
         "@platforms//os:windows": [],
         "//conditions:default": ["evthread_pthread.c"],
     }),
-    copts = LIBEVENT_COPTS,
     includes = ["include"],
     linkopts = select({
         "@platforms//os:windows": [],
