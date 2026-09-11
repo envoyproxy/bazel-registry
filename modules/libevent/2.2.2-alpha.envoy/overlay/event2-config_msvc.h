@@ -71,6 +71,9 @@
 /* Define if your system supports the epoll system calls */
 /* #undef EVENT__HAVE_EPOLL */
 
+/* Define if your system supports the wepoll module */
+#define EVENT__HAVE_WEPOLL 1
+
 /* Define to 1 if you have the `epoll_create1' function. */
 /* #undef EVENT__HAVE_EPOLL_CREATE1 */
 
@@ -269,6 +272,9 @@
 
 /* Define to 1 if you have the `_gmtime64' function. */
 #define EVENT__HAVE__GMTIME64 1
+
+/* Define to 1 if you have the `BCryptGenRandom' function. */
+#define EVENT__HAVE_BCRYPTGENRANDOM 1
 
 /* Define to 1 if the system has the type `struct addrinfo'. */
 #define EVENT__HAVE_STRUCT_ADDRINFO 1

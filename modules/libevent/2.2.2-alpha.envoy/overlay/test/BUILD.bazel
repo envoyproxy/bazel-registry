@@ -219,3 +219,13 @@ cc_test(
         "//:event_core",
     ],
 )
+
+cc_test(
+    name = "test-platform",
+    size = "small",
+    srcs = ["test-platform.c"],
+    deps = [
+        "//:event_core",
+        "//:event_pthreads",
+    ],
+)
