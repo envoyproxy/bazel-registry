@@ -1,0 +1,4 @@
+module(name = "liburing_test_module")
+
+bazel_dep(name = "liburing", version = "2.15.envoy")
+bazel_dep(name = "rules_cc", version = "0.1.1")
