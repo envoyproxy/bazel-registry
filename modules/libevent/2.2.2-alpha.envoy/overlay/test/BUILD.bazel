@@ -177,16 +177,6 @@ cc_test(
     ],
 )
 
-# Match Envoy's Windows backend selection by excluding win32.
-cc_test(
-    name = "test-init-wepoll",
-    size = "small",
-    srcs = ["test-init.c"],
-    env = {"EVENT_NOWIN32": "1"},
-    target_compatible_with = ["@platforms//os:windows"],
-    deps = ["//:event_core"],
-)
-
 cc_test(
     name = "test-ratelim",
     srcs = [

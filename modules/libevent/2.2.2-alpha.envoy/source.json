@@ -17,7 +17,7 @@
         "event2-config_msvc.h": "sha256-wIon2cHHhCEfsbPGigkiHrRhwQIsYYHqdIO5qhjSALc=",
         "include/event2/event-config.h": "sha256-HblJnJK+aX/L4Tj2hG3db/riQw5y8tvQQFZ3whbeTmI=",
         "sample/BUILD.bazel": "sha256-iEZQLW9ACw6pPprSP4In0j7AujzF4rs1as7eOMNypwo=",
-        "test/BUILD.bazel": "sha256-w6XBZlGsF90rPnLzJe2/J20o57x20u2Mt2S/1qO9cr4=",
+        "test/BUILD.bazel": "sha256-r7UHPBK0y3sH6LS2S+ooITcLM8qM3BC8TrSzC1dTfi0=",
         "test/test-config.c": "sha256-FXkIk9oyNISnD18qr8v0+tWIAWioGd5ZZXwIFTKkbtc="
     }
 }
