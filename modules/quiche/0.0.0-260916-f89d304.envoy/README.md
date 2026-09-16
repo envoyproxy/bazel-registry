@@ -1,6 +1,6 @@
-# quiche 0.0.0-260831-5c9cc6b.envoy
+# quiche 0.0.0-260916-f89d304.envoy
 
-This module packages QUICHE from commit `5c9cc6b37f55a97071077a6190bf4f0bc7a09c1f` (2026-08-31) with Envoy's `oghttp2_trailer_fix.patch`, a generated root `BUILD.bazel` overlay, and a patch that removes upstream `*.bazel` files so the overlay is authoritative.
+This module packages QUICHE from commit `f89d30495cb0b431d15fc9bbf204b03ca16ce617` (2026-09-16) with a generated root `BUILD.bazel` overlay, and a patch that removes upstream `*.bazel` files so the overlay is authoritative.
 
 The overlay breaks the `@envoy` cycle by inlining lightweight compatibility macros and rewriting Envoy platform deps to `label_flag`s. By default those flags point at QUICHE's upstream default platform impl headers (or empty stubs for Envoy-only/test-only hooks). Envoy should override the public flags to its real platform impl targets when consuming this module.
 
