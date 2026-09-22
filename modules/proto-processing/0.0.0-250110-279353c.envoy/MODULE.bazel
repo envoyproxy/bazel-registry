@@ -32,7 +32,7 @@ bazel_dep(
 )
 bazel_dep(
     name = "proto-converter",
-    version = "0.0.0-20240625-1db7653.envoy",
+    version = "0.0.0-20260912-3850764.envoy",
     repo_name = "com_google_protoconverter",
 )
 bazel_dep(
