@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/msgpack/msgpack-c",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:msgpack/msgpack-c"
     ],

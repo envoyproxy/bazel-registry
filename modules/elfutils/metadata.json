@@ -2,10 +2,9 @@
     "homepage": "https://sourceware.org/elfutils/",
     "maintainers": [
         {
-            "email": "206078155+daemoninstitute@users.noreply.github.com",
-            "github": "daemoninstitute",
-            "github_user_id": 206078155,
-            "name": "James Wilson"
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
         }
     ],
     "repository": [

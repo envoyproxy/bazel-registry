@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/proxy-wasm/proxy-wasm-cpp-host",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:proxy-wasm/proxy-wasm-cpp-host"
     ],

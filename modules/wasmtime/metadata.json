@@ -1,6 +1,12 @@
 {
     "homepage": "https://wasmtime.dev/",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:bytecodealliance/wasmtime"
     ],

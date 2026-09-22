@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/bufbuild/protoc-gen-validate",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:bufbuild/protoc-gen-validate"
     ],

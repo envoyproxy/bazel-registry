@@ -2,7 +2,7 @@
 
 ## Android config header regeneration
 
-`/home/runner/work/bazel-registry/bazel-registry/modules/libevent/2.2.2-alpha.envoy/overlay/event2-config_android.h`
+`modules/libevent/2.2.2-alpha.envoy/overlay/event2-config_android.h`
 was generated from libevent `release-2.2.2-alpha` using:
 
 - Android NDK: `r26d`

@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/intel/QATzip",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:intel/QATzip"
     ],

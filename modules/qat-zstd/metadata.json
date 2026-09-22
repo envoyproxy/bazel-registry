@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/intel/QAT-ZSTD-Plugin",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:intel/QAT-ZSTD-Plugin"
     ],

@@ -2,8 +2,9 @@
     "homepage": "https://github.com/VectorCamp/vectorscan",
     "maintainers": [
         {
-            "name": "Envoy maintainers",
-            "github": "envoyproxy"
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
         }
     ],
     "repository": [

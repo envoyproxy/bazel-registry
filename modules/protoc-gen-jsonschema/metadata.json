@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/norbjd/protoc-gen-jsonschema",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:norbjd/protoc-gen-jsonschema"
     ],

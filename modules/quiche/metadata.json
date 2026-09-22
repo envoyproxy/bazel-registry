@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/google/quiche",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:google/quiche"
     ],

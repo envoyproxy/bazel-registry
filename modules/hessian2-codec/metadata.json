@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/alibaba/hessian2-codec",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:alibaba/hessian2-codec"
     ],

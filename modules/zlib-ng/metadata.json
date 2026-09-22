@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/zlib-ng/zlib-ng",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:zlib-ng/zlib-ng"
     ],
