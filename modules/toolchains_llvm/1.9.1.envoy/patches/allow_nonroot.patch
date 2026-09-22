@@ -1,6 +1,6 @@
-diff -Naur s0/toolchain/extensions/llvm.bzl s1/toolchain/extensions/llvm.bzl
---- a/toolchain/extensions/llvm.bzl	2026-07-24 08:48:16.980412222 +0000
-+++ b/toolchain/extensions/llvm.bzl	2026-07-24 08:48:16.989412366 +0000
+diff -Naur a/toolchain/extensions/llvm.bzl b/toolchain/extensions/llvm.bzl
+--- a/toolchain/extensions/llvm.bzl
++++ b/toolchain/extensions/llvm.bzl
 @@ -51,13 +51,16 @@
      return constraints
  
