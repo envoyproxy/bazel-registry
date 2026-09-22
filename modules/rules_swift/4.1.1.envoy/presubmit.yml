@@ -1,7 +1,7 @@
 shell_commands: &shell_commands
 - "echo --- Downloading and extracting Swift $SWIFT_VERSION to $SWIFT_HOME"
 - "mkdir $SWIFT_HOME"
-- "curl https://download.swift.org/swift-${SWIFT_VERSION}-release/ubuntu2204/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu22.04.tar.gz | tar xvz --strip-components=1 -C $SWIFT_HOME"
+- "curl --fail --location --silent --show-error https://download.swift.org/swift-${SWIFT_VERSION}-release/ubuntu2204/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu22.04.tar.gz | tar xvz --strip-components=1 -C $SWIFT_HOME"
 
 matrix:
   bazel:
