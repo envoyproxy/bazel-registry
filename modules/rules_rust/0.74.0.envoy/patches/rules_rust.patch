@@ -74,8 +74,27 @@ index 36bcbce..44e31c8 100644
  
              # Watch cfg.lockfile AFTER generation. The generator may modify it during
              # repin, and in Bazel 9 module_ctx.read verifies digests for files already
+diff --git a/rust/private/rust.bzl b/rust/private/rust.bzl
+index a69202a..cb625dc 100644
+--- a/rust/private/rust.bzl
++++ b/rust/private/rust.bzl
+@@ -1318,6 +1318,14 @@ _RUST_BINARY_ATTRS = {
+         """),
+         allow_single_file = True,
+     ),
++    "out_binary": attr.bool(
++        doc = (
++            "Force a target, regardless of it's `crate_type`, to always mark the " +
++            "file as executable. This attribute is only used to support wasm targets but is " +
++            "expected to be removed following a resolution to https://github.com/bazelbuild/rules_rust/issues/771."
++        ),
++        default = False,
++    ),
+     "stamp": _stamp_attribute(default_value = -1),
+ } | _EXPERIMENTAL_USE_CC_COMMON_LINK_ATTRS
+ 
 diff --git a/rust/private/rustc.bzl b/rust/private/rustc.bzl
-index d447c97..57968c8 100644
+index d447c97..edc0b69 100644
 --- a/rust/private/rustc.bzl
 +++ b/rust/private/rustc.bzl
 @@ -1416,7 +1416,7 @@ def construct_arguments(
@@ -87,7 +106,20 @@ index d447c97..57968c8 100644
  
          # Crates with generated sources are compiled from the output tree
          # (see `transform_sources`), so the coverage mapping records their
-@@ -2216,7 +2216,7 @@ def rustc_compile_action(
+@@ -2166,7 +2166,11 @@ def rustc_compile_action(
+ 
+     runfiles = runfiles.merge_all(transitive_runfiles)
+ 
+-    executable = crate_info.output if crate_info.type == "bin" or crate_info.is_test else None
++    # TODO: Remove after some resolution to
++    # https://github.com/bazelbuild/rules_rust/issues/771
++    out_binary = getattr(attr, "out_binary", False)
++
++    executable = crate_info.output if crate_info.type == "bin" or crate_info.is_test or out_binary else None
+ 
+     instrumented_files_kwargs = {
+         "dependency_attributes": ["deps", "crate"],
+@@ -2216,7 +2220,7 @@ def rustc_compile_action(
              **crate_info_dict
          )
  
@@ -96,3 +128,15 @@ index d447c97..57968c8 100644
          # These rules are not supposed to be depended on by other rust targets, and
          # as such they shouldn't provide a CrateInfo. However, one may still want to
          # write a rust_test for them, so we provide the CrateInfo wrapped in a provider
+@@ -2414,6 +2418,11 @@ def establish_cc_info(ctx, attr, crate_info, toolchain, cc_toolchain, feature_co
+     if crate_info.type not in ("dylib", "staticlib", "cdylib", "rlib", "lib"):
+         return []
+ 
++    # TODO: Remove after some resolution to
++    # https://github.com/bazelbuild/rules_rust/issues/771
++    if getattr(attr, "out_binary", False):
++        return []
++
+     dot_a = None
+     library_to_link = None
+ 
