@@ -1,0 +1,36 @@
+Carry Envoy's missing-toolchain-message delta across the 4.1.1.envoy
+re-cut.
+
+The upstream 4.1.1 source still contains the missing-`swiftc` text in
+`swift/internal/swift_autoconfiguration.bzl`, so keep the Envoy fork carrying
+this small delta while the mobile dependency bump stack is tested.
+
+===================================================================
+--- a/swift/internal/swift_autoconfiguration.bzl
++++ b/swift/internal/swift_autoconfiguration.bzl
+@@ -213,11 +213,7 @@
+     """
+     path_to_swiftc = repository_ctx.which("swiftc")
+     if not path_to_swiftc:
+-        return """\
+-# No 'swiftc' executable found in $PATH. Not auto-generating a Linux Swift \
+-toolchain.
+-"""
+-
++        return ""
+     root = _resolve_toolchain_root(repository_ctx, path_to_swiftc)
+     feature_values = _compute_feature_values(repository_ctx, path_to_swiftc)
+     version_file, parsed_version = _write_swift_version(repository_ctx, path_to_swiftc)
+@@ -282,11 +278,7 @@
+     """
+     path_to_swiftc = repository_ctx.which("swiftc.exe")
+     if not path_to_swiftc:
+-        return """\
+-# No 'swiftc.exe' executable found in $PATH. Not auto-generating a Windows \
+-Swift toolchain.
+-"""
+-
++        return ""
+     root = path_to_swiftc.dirname.dirname
+     arch = _normalized_windows_cpu(repository_ctx.os.arch)
+     enabled_features = [

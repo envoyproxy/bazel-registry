@@ -11,7 +11,7 @@
         "github:bazelbuild/rules_swift"
     ],
     "versions": [
-        "2.5.0.envoy"
+        "4.1.1.envoy"
     ],
     "yanked_versions": {}
 }
