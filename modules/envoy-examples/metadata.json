@@ -14,7 +14,6 @@
         "github:envoyproxy/examples"
     ],
     "versions": [
-        "0.2.5.envoy",
         "0.2.6.envoy"
     ],
     "yanked_versions": {}
