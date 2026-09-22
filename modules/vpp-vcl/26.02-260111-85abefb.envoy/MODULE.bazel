@@ -1,6 +1,6 @@
 module(
     name = "vpp-vcl",
-    version = "26.02-dev-85abefb.envoy",
+    version = "26.02-260111-85abefb.envoy",
     bazel_compatibility = [">=7.2.1"],
     compatibility_level = 0,
 )
