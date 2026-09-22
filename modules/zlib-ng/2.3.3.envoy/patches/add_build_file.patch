@@ -1,13 +1,13 @@
 --- BUILD.bazel
 +++ BUILD.bazel
-@@ -0,0 +1,162 @@
+@@ -0,0 +1,164 @@
 +# This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 +# See https://llvm.org/LICENSE.txt for license information.
 +# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 +
 +# Copied from
 +# https://github.com/llvm/llvm-project/blob/e8af89ef3de45b3058041388267d728c4ade16e8/utils/bazel/third_party_build/zlib-ng.BUILD#L1
-+# Modified for zlib-ng 2.3.2
++# Modified for zlib-ng 2.3.3
 +
 +load("@rules_cc//cc:defs.bzl", "cc_library")
 +
@@ -37,10 +37,11 @@
 +)
 +
 +genrule(
-+    # Generate gzread.c from gzread.c.in by removing @ZLIB_SYMBOL_PREFIX@ placeholders.
++    # Generate gzread_mangle.h from gzread_mangle.h.in by removing
++    # @ZLIB_SYMBOL_PREFIX@ placeholders.
 +    name = "gzread_gen",
-+    srcs = ["gzread.c.in"],
-+    outs = ["gzread.c"],
++    srcs = ["gzread_mangle.h.in"],
++    outs = ["gzread_mangle.h"],
 +    cmd = "sed 's/@ZLIB_SYMBOL_PREFIX@//g' $(SRCS) > $(OUTS)",
 +)
 +
@@ -62,6 +63,7 @@
 +        "deflate_stored.c",
 +        "functable.c",
 +        "gzlib.c",
++        "gzread.c",
 +        "gzwrite.c",
 +        "infback.c",
 +        "inflate.c",
