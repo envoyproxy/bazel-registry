@@ -11,7 +11,7 @@
         "github:bazelbuild/rules_apple"
     ],
     "versions": [
-        "3.20.1.envoy"
+        "5.1.0.envoy"
     ],
     "yanked_versions": {}
 }

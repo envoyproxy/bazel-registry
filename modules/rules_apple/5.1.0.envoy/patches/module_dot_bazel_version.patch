@@ -1,0 +1,11 @@
+--- a/MODULE.bazel
++++ b/MODULE.bazel
+@@ -2,7 +2,7 @@
+ 
+ module(
+     name = "rules_apple",
+-    version = "0",
++    version = "5.1.0.envoy",
+     bazel_compatibility = [">=8.0.0"],
+     compatibility_level = 1,
+ )
