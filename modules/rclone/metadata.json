@@ -1,6 +1,12 @@
 {
     "homepage": "https://rclone.org",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:rclone/rclone"
     ],

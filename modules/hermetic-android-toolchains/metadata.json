@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/keith/hermetic_android_toolchains",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:keith/hermetic_android_toolchains"
     ],

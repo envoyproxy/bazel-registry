@@ -2,8 +2,9 @@
     "homepage": "https://github.com/opencomputeproject/ocp-diag-core",
     "maintainers": [
         {
-            "email": "bcr-maintainers@bazel.build",
-            "name": "No Maintainer Specified"
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
         }
     ],
     "repository": [

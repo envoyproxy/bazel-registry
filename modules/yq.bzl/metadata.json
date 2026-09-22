@@ -1,6 +1,12 @@
 {
   "homepage": "https://github.com/bazel-contrib/yq.bzl",
-  "maintainers": [],
+  "maintainers": [
+    {
+      "email": "maintainers@envoyproxy.io",
+      "github": "envoyproxy",
+      "name": "Envoy Proxy Maintainers"
+    }
+  ],
   "repository": [
     "github:bazel-contrib/yq.bzl"
   ],

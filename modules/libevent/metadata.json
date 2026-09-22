@@ -1,6 +1,12 @@
 {
     "homepage": "https://libevent.org/",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:libevent/libevent"
     ],

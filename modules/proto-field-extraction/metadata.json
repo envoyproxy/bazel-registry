@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/grpc-ecosystem/proto-field-extraction",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:grpc-ecosystem/proto-field-extraction"
     ],

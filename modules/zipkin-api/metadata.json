@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/openzipkin/zipkin-api",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:openzipkin/zipkin-api"
     ],

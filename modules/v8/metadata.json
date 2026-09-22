@@ -1,6 +1,12 @@
 {
     "homepage": "https://v8.dev/",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:v8/v8"
     ],

@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/bytecodealliance/wasm-micro-runtime",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:bytecodealliance/wasm-micro-runtime"
     ],

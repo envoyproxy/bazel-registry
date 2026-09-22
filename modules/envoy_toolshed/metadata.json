@@ -4,7 +4,13 @@
         {
             "email": "ryan@synca.io",
             "github": "phlax",
+            "github_user_id": 454682,
             "name": "Ryan Northey"
+        },
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
         }
     ],
     "repository": [

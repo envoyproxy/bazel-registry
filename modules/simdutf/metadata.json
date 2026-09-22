@@ -1,6 +1,12 @@
 {
     "homepage": "https://github.com/simdutf/simdutf",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:simdutf/simdutf"
     ],

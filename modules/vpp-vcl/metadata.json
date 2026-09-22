@@ -1,6 +1,12 @@
 {
     "homepage": "https://fd.io/",
-    "maintainers": [],
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
     "repository": [
         "github:FDio/vpp"
     ],

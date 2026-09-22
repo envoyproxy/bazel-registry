@@ -2,12 +2,15 @@
     "homepage": "https://www.envoyproxy.io/",
     "maintainers": [
         {
-            "github": "mmorel-35",
-            "github_user_id": 6032561
+            "email": "ryan@synca.io",
+            "github": "phlax",
+            "github_user_id": 454682,
+            "name": "Ryan Northey"
         },
         {
-            "github": "phlax",
-            "github_user_id": 454682
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
         }
     ],
     "repository": [
