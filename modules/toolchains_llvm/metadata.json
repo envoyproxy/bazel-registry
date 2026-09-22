@@ -11,7 +11,7 @@
         "github:bazel-contrib/toolchains_llvm"
     ],
     "versions": [
-        "1.9.0.envoy"
+        "1.9.1.envoy"
     ],
     "yanked_versions": {}
 }
