@@ -1,0 +1,16 @@
+{
+    "url": "https://github.com/nghttp2/nghttp2/releases/download/v1.70.0/nghttp2-1.70.0.tar.gz",
+    "integrity": "sha256-qjF+LPncpq+grtaPj61v8wPsaYLiWnjHXAtl4rmz3tU=",
+    "strip_prefix": "nghttp2-1.70.0",
+    "patch_strip": 1,
+    "patches": {
+        "nghttp2.patch": "sha256-XQTQH0EJzv+6EZKfCzGeNB3JPCthlcBraERW5O7o5M8=",
+        "nghttp2_huffman.patch": "sha256-hO4+P8QXEXqvj08R6cYFAFNL1JohafwVIFtp20r/oXk=",
+        "nghttp2_max_hd_nv.patch": "sha256-PIzsBBUZXPZF79GeyJPw3QJxjRSUvivk0mGgZmGmwNc="
+    },
+    "overlay": {
+        "BUILD.bazel": "sha256-h9TcdupJ+2yh9Y6bf+QIEPZY6pkZSBpHKn6xps19fK8=",
+        "MODULE.bazel": "sha256-3/8eE6yXnYqoqLP+0PvKhGKEmiVSGgkdk2XoZ8rc37w=",
+        "config/config.h": "sha256-ionfCCUf7G0RP+Ae+9PyGof5bAGYtcha5tDCEY7wHUQ="
+    }
+}
