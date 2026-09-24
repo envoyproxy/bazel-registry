@@ -11,7 +11,8 @@
         "github:protocolbuffers/protobuf"
     ],
     "versions": [
-        "35.1.bcr.envoy"
+        "35.1.bcr.envoy",
+        "36.2.bcr.envoy"
     ],
     "yanked_versions": {}
 }

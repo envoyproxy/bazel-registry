@@ -1,0 +1,9 @@
+{
+    "integrity": "sha256-PZZCpmLRDmjrrl5T8U3M5RBWhCEtUHj44NR9GrOua2Q=",
+    "strip_prefix": "protobuf-36.2",
+    "url": "https://github.com/protocolbuffers/protobuf/releases/download/v36.2/protobuf-36.2.tar.gz",
+    "patches": {
+        "envoy.patch": "sha256-lL3QdRcsUbV5AT4+lhsDwQw6R9PDtiGX9U5qQ0bXUMc="
+    },
+    "patch_strip": 1
+}
