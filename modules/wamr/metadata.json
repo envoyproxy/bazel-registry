@@ -11,7 +11,8 @@
         "github:bytecodealliance/wasm-micro-runtime"
     ],
     "versions": [
-        "2.4.4.envoy"
+        "2.4.4.envoy",
+        "2.4.5.envoy"
     ],
     "yanked_versions": []
 }
