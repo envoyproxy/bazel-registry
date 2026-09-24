@@ -117,6 +117,11 @@ static char *mnemonic_from_line(const char *line, size_t len) {
     }
   }
 
+  if (name.len == 0) {
+    free(name.data);
+    return NULL;
+  }
+
   if (strstr(name.data, "INVALID") != NULL) {
     free(name.data);
     return NULL;
