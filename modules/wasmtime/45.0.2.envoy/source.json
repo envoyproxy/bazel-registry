@@ -4,6 +4,6 @@
     "strip_prefix": "wasmtime-45.0.2",
     "overlay": {
         "BUILD.bazel": "sha256-7EiFHQ3cgBuZHc8Wq8WbFuaO/T+klUyjUpKwS9dT2i4=",
-        "cargo-bazel-lock.json": "sha256-1FjoFGa70BoAM2vRGEVohlYOVTOmyCNRGxR+9sHHnTo="
+        "cargo-bazel-lock.json": "sha256-vB+AEwI0Aapt994ZytQ1SSstZR6TgBsBkhRxGMe5iNE="
     }
 }
