@@ -1,0 +1,28 @@
+diff -urN orig/common/internal/byte_string.cc mod/common/internal/byte_string.cc
+--- orig/common/internal/byte_string.cc
++++ mod/common/internal/byte_string.cc
+@@ -104,6 +104,12 @@
+ 
+ ByteString::ByteString(Allocator<> allocator, absl::string_view string) {
+   ABSL_DCHECK_LE(string.size(), max_size());
++
++  if (string.data() == nullptr) {
++    SetSmallEmpty(allocator.arena());
++    return;
++  }
++
+   auto* arena = allocator.arena();
+   if (string.size() <= kSmallByteStringCapacity) {
+     SetSmall(arena, string);
+diff -urN orig/common/value.h mod/common/value.h
+--- orig/common/value.h
++++ mod/common/value.h
+@@ -2802,7 +2802,7 @@
+     const google::protobuf::DescriptorPool* absl_nonnull descriptor_pool,
+     google::protobuf::MessageFactory* absl_nonnull message_factory,
+     google::protobuf::Arena* absl_nonnull arena) const {
+-  ABSL_DCHECK_GT(qualifiers.size(), 0);
++  ABSL_DCHECK_GT(static_cast<int>(qualifiers.size()), 0);
+   ABSL_DCHECK(descriptor_pool != nullptr);
+   ABSL_DCHECK(message_factory != nullptr);
+   ABSL_DCHECK(arena != nullptr);
