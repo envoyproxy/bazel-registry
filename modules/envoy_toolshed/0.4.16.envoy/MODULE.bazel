@@ -125,7 +125,7 @@ use_repo(wee8_prebuilt_ext, "wee8_prebuilt_x86_64", "wee8_prebuilt_x86_64_libstd
 # glint_ext.setup(bins_release_version = "0.1.21")
 # use_repo(glint_ext, "glint")
 
-# This needs to be before llvm to win in transitionsj
+# This needs to be before llvm to win in transitions
 register_toolchains(
     "//toolchains/gcc:linux_x64_toolchain",
     "//toolchains/gcc:linux_arm64_toolchain",
