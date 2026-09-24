@@ -260,11 +260,34 @@
     */
 --- a/lib/nghttp2_session.c
 +++ b/lib/nghttp2_session.c
-@@ -791,6 +791,7 @@
-   nghttp2_mem *mem;
-   nghttp2_inflight_settings *settings;
+@@ -438,6 +438,7 @@
+   size_t max_deflate_dynamic_table_size =
+     NGHTTP2_HD_DEFAULT_MAX_DEFLATE_BUFFER_SIZE;
    size_t i;
 +  int deflater_inited = 0;
+   uint32_t map_seed;
  
-   if (session == NULL) {
-     return;
+   if (mem == NULL) {
+@@ -576,10 +577,18 @@
+       nghttp2_ratelim_init(&(*session_ptr)->glitch_ratelim,
+                            option->glitch_burst, option->glitch_rate);
+     }
+-  }
+-
+-  rv = nghttp2_hd_deflate_init2(&(*session_ptr)->hd_deflater,
+-                                max_deflate_dynamic_table_size, mem);
++
++    if (option->opt_set_mask & NGHTTP2_OPT_DISABLE_HUFFMAN && option->disable_huffman) {
++      rv = nghttp2_hd_deflate_init3(&(*session_ptr)->hd_deflater,
++                                    max_deflate_dynamic_table_size, mem);
++      deflater_inited = 1;
++    }
++  }
++
++  if (!deflater_inited) {
++    rv = nghttp2_hd_deflate_init2(&(*session_ptr)->hd_deflater,
++                                  max_deflate_dynamic_table_size, mem);
++  }
+   if (rv != 0) {
+     goto fail_hd_deflater;
+   }
