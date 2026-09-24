@@ -240,7 +240,7 @@ diff --git a/third_party/BUILD b/third_party/BUILD
 index ff2dcae..561edfc 100644
 --- a/third_party/BUILD
 +++ b/third_party/BUILD
-@@ -30,21 +30,43 @@ config_setting(
+@@ -30,27 +30,55 @@ config_setting(
      flag_values = {":grpc_use_openssl": "true"},
  )
  
@@ -253,6 +253,12 @@ index ff2dcae..561edfc 100644
 +label_flag(
 +    name = "crypto_lib",
 +    build_setting_default = ":_default_crypto",
++    visibility = ["//visibility:public"],
++)
++
++label_flag(
++    name = "zlib_lib",
++    build_setting_default = "@zlib//:zlib",
 +    visibility = ["//visibility:public"],
 +)
 +
@@ -287,6 +293,13 @@ index ff2dcae..561edfc 100644
      tags = ["manual"],
  )
  
+ alias(
+     name = "madler_zlib",
+-    actual = "@zlib//:zlib",
++    actual = ":zlib_lib",
+     tags = ["manual"],
+ )
+
 diff --git a/src/proto/grpc/gcp/BUILD b/src/proto/grpc/gcp/BUILD
 index 7e432b6..f704d5f 100644
 --- a/src/proto/grpc/gcp/BUILD
