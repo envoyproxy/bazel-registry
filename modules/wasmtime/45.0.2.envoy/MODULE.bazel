@@ -60,5 +60,6 @@ crate.spec(
 crate.from_specs(
     name = "cu",
     cargo_lockfile = "//:Cargo.lock",
+    lockfile = "//:cargo-bazel-lock.json",
 )
 use_repo(crate, "cu")
