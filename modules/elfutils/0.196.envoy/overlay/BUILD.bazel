@@ -1,5 +1,5 @@
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_m4//m4:m4.bzl", "m4")
 
 # Configurable zlib provider. Defaults to @zlib-ng//:zlib-ng.
@@ -38,6 +38,15 @@ _COMMON_LOCAL_DEFINES = [
 cc_binary(
     name = "gen_mnemonics_tool",
     srcs = ["gen_mnemonics.c"],
+)
+
+cc_test(
+    name = "gen_mnemonics_test",
+    srcs = [
+        "gen_mnemonics.c",
+        "testdata/gen_mnemonics_test.c",
+    ],
+    local_defines = ["main=gen_mnemonics_tool_main"],
 )
 
 m4(

@@ -78,6 +78,7 @@ static char *read_file(const char *path, size_t *len) {
 
   if (fclose(f) != 0) {
     fprintf(stderr, "failed to close %s: %s\n", path, strerror(errno));
+    free(buf.data);
     exit(1);
   }
 
