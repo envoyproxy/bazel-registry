@@ -3,9 +3,9 @@
     "strip_prefix": "elfutils-0.196",
     "overlay": {
         "BUILD.bazel": "sha256-yIqYCAWlPZvNN9qD6Ketq5VrnVzFSMmJLIrj/AZb10U=",
-        "gen_mnemonics.c": "sha256-25JbiSaq+mKT91kVvtcy1M/pWNvpb+qvPAcldzyYZeY=",
+        "gen_mnemonics.c": "sha256-7nkwP1pH5gRkyou3VpplKPBbXP9cKvO84luE29HqtbA=",
         "lib/config.h": "sha256-3f1y+lb2zDI5/i9qV2puPiAuG+/MIRR81dfv+mFlPkM=",
-        "testdata/gen_mnemonics_test.c": "sha256-y+PpHUuo0RGPc56B2h/b2QUIwc0znIgFc0GPXCZnhmY="
+        "testdata/gen_mnemonics_test.c": "sha256-6hbmGijhQE6pe0WxutV+Xw/pt8mQxqw2z0P/uEXAMC8="
     },
     "integrity": "sha256-/VzGt3rWdzysk8s/QV+TGKw7NFXuz4Afa0p0LE9scgk="
 }

@@ -157,6 +157,8 @@ static void write_mnemonics(const char *expanded, size_t expanded_len,
   char **items = NULL;
   size_t item_count = 0;
   size_t item_cap = 0;
+  FILE *out = NULL;
+  const char *operation = "open";
 
   while (pos < expanded_len) {
     size_t line_start = pos;
@@ -206,10 +208,9 @@ static void write_mnemonics(const char *expanded, size_t expanded_len,
 
   qsort(items, item_count, sizeof(*items), compare_strings);
 
-  FILE *out = fopen(out_path, "wb");
+  out = fopen(out_path, "wb");
   if (out == NULL) {
-    fprintf(stderr, "failed to open %s: %s\n", out_path, strerror(errno));
-    exit(1);
+    goto fail;
   }
 
   const char *previous = NULL;
@@ -217,22 +218,37 @@ static void write_mnemonics(const char *expanded, size_t expanded_len,
     if (previous != NULL && strcmp(previous, items[i]) == 0) {
       continue;
     }
+    operation = "write";
     if (fprintf(out, "%s\n", items[i]) < 0) {
-      fprintf(stderr, "failed to write %s: %s\n", out_path, strerror(errno));
-      exit(1);
+      goto fail;
     }
     previous = items[i];
   }
+
+  operation = "close";
+  if (fclose(out) != 0) {
+    out = NULL;
+    goto fail;
+  }
+  out = NULL;
 
   for (size_t i = 0; i < item_count; i++) {
     free(items[i]);
   }
   free(items);
+  return;
 
-  if (fclose(out) != 0) {
-    fprintf(stderr, "failed to close %s: %s\n", out_path, strerror(errno));
-    exit(1);
+fail:;
+  int saved_errno = errno;
+  if (out != NULL) {
+    fclose(out);
   }
+  for (size_t i = 0; i < item_count; i++) {
+    free(items[i]);
+  }
+  free(items);
+  fprintf(stderr, "failed to %s %s: %s\n", operation, out_path, strerror(saved_errno));
+  exit(1);
 }
 
 int main(int argc, char **argv) {

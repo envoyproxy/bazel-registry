@@ -65,6 +65,7 @@ static void write_file_or_die(const char *path, const char *contents)
   size_t len = strlen(contents);
   if (fwrite(contents, 1, len, f) != len)
     {
+      fclose(f);
       perror("fwrite");
       exit(1);
     }
@@ -79,6 +80,7 @@ static void write_file_or_die(const char *path, const char *contents)
 static char *read_file_or_die(const char *path)
 {
   FILE *f = fopen(path, "rb");
+  char *contents = NULL;
   if (f == NULL)
     {
       perror("fopen");
@@ -87,6 +89,7 @@ static char *read_file_or_die(const char *path)
 
   if (fseek(f, 0, SEEK_END) != 0)
     {
+      fclose(f);
       perror("fseek");
       exit(1);
     }
@@ -94,25 +97,30 @@ static char *read_file_or_die(const char *path)
   long len = ftell(f);
   if (len < 0)
     {
+      fclose(f);
       perror("ftell");
       exit(1);
     }
 
   if (fseek(f, 0, SEEK_SET) != 0)
     {
+      fclose(f);
       perror("fseek");
       exit(1);
     }
 
-  char *contents = malloc((size_t) len + 1);
+  contents = malloc((size_t) len + 1);
   if (contents == NULL)
     {
+      fclose(f);
       perror("malloc");
       exit(1);
     }
 
   if (fread(contents, 1, (size_t) len, f) != (size_t) len)
     {
+      free(contents);
+      fclose(f);
       perror("fread");
       exit(1);
     }
@@ -120,6 +128,7 @@ static char *read_file_or_die(const char *path)
 
   if (fclose(f) != 0)
     {
+      free(contents);
       perror("fclose");
       exit(1);
     }
