@@ -11,7 +11,8 @@
         "https://sourceware.org/elfutils/ftp/"
     ],
     "versions": [
-        "0.195.envoy"
+        "0.195.envoy",
+        "0.196.envoy"
     ],
     "yanked_versions": {}
 }
