@@ -1,0 +1,19 @@
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load(":dep_paths.bzl", "dep_paths")
+
+dep_paths(
+    name = "extension_dep_paths",
+    crypto = "@grpc_deps//:crypto",
+    expected_crypto = "@boringssl//:crypto",
+    expected_ssl = "@boringssl//:ssl",
+    expected_zlib = "@zlib-ng//:zlib-ng",
+    ssl = "@grpc_deps//:ssl",
+    zlib = "@grpc_deps//:zlib",
+)
+
+sh_test(
+    name = "extension_deps_test",
+    srcs = ["extension_deps_test.sh"],
+    args = ["$(location :extension_dep_paths)"],
+    data = [":extension_dep_paths"],
+)

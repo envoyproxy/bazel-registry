@@ -19,6 +19,9 @@ module(
     repo_name = "com_github_grpc_grpc",
 )
 
+grpc = use_extension("//:extensions.bzl", "grpc")
+use_repo(grpc, "grpc_deps")
+
 # Regular dependencies
 # ====================
 
