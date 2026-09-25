@@ -5,7 +5,7 @@
     "overlay": {
         "BUILD.bazel": "sha256-v6Nnhskqw+ekBOEOJIKdVtvFsHJ3pDmTqc4gl3RjTxo=",
         "include/libsxg.h": "sha256-yvW4je5JO/hZ69v1dJgXtPrUbuEjYXJdWzteLY1TXuA=",
-        "envoy_deps.bzl": "sha256-iSZdcoZ4fJTDsezIPLhCZV0FUZQo92gGpmWPJHCK+ak=",
+        "envoy_deps.bzl": "sha256-rgNPuv1jDB4Bsy6EtWgjlKJnOrpWSKD6WuRNvQX4bHQ=",
         "extensions.bzl": "sha256-Jq86FkAXYqTXAW8VYiLRiQ9hQpUNNg1pHjzpV7moiQg="
     }
 }

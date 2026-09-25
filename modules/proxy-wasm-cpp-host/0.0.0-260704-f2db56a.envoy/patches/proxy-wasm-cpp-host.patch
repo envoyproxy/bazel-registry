@@ -163,8 +163,8 @@ diff -ruN original/envoy_deps.bzl edited/envoy_deps.bzl
 @@ -0,0 +1,57 @@
 +"""Shared dependency-injection helpers for Envoy registry modules.
 +
-+This file is duplicated verbatim across the Envoy librdkafka/grpc/protobuf
-+modules. Keep the copies identical so they can be consolidated later.
++This file is duplicated across Envoy registry modules that use deps
++extensions. Keep the copies identical so they can be consolidated later.
 +"""
 +
 +def envoy_value(tag, name):
@@ -343,14 +343,14 @@ diff -ruN original/extensions.bzl edited/extensions.bzl
 +            "wasmedge_lib",
 +            [(entry.module_name, entry.wasmedge_lib) for entry in root],
 +            [(entry.module_name, entry.wasmedge_lib) for entry in non_root],
-+            Label("@proxy_wasm_cpp_host//bazel:default_wasmedge_lib"),
++            Label("@@proxy-wasm-cpp-host+//bazel:default_wasmedge_lib"),
 +        ),
 +        v8_engine = envoy_pick(
 +            "proxy_wasm_cpp_host",
 +            "v8_engine",
 +            [(entry.module_name, entry.v8_engine) for entry in root],
 +            [(entry.module_name, entry.v8_engine) for entry in non_root],
-+            Label("@proxy_wasm_cpp_host//bazel:wee8_no_pointer_compression"),
++            Label("@@proxy-wasm-cpp-host+//bazel:wee8_no_pointer_compression"),
 +        ),
 +    )
 +

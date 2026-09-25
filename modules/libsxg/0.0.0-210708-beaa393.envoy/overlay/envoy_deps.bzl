@@ -1,7 +1,7 @@
 """Shared dependency-injection helpers for Envoy registry modules.
 
-This file is duplicated verbatim across the Envoy librdkafka/grpc/protobuf
-modules. Keep the copies identical so they can be consolidated later.
+This file is duplicated across Envoy registry modules that use deps
+extensions. Keep the copies identical so they can be consolidated later.
 """
 
 def envoy_value(tag, name):
