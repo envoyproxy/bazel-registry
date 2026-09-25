@@ -1,4 +1,8 @@
 bcr_test_module:
+  # `test/MODULE.bazel` adds boringssl/zlib-ng and calls
+  # `librdkafka.configure(...)`, so tasks below run against the extension-
+  # configured dependency graph rather than librdkafka's default openssl/zlib
+  # aliases.
   module_path: test
   matrix:
     platform:
@@ -39,6 +43,7 @@ bcr_test_module:
       test_targets:
       - '@librdkafka//:all'
     verify_targets_extension:
+      name: Extension-configured boringssl/zlib-ng build
       platform: ${{ platform }}
       bazel: ${{ bazel }}
       build_flags:
