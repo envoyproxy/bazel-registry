@@ -118,6 +118,7 @@ def _librdkafka_impl(module_ctx):
 
     if hasattr(module_ctx, "extension_metadata"):
         return module_ctx.extension_metadata(reproducible = True)
+    return None
 
 configure = tag_class(
     attrs = {

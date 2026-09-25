@@ -44,5 +44,8 @@ bcr_test_module:
       build_flags:
       - '--@curl//:ssl_lib=boringssl'
       build_targets:
+      - '@librdkafka_deps//:crypto'
+      - '@librdkafka_deps//:ssl'
+      - '@librdkafka_deps//:zlib'
       - '@librdkafka//:librdkafka'
       - '@librdkafka//:librdkafka_cpp'
