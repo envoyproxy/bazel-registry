@@ -54,3 +54,7 @@ bcr_test_module:
       - '@librdkafka_deps//:zlib'
       - '@librdkafka//:librdkafka'
       - '@librdkafka//:librdkafka_cpp'
+      test_flags:
+      - '--@curl//:ssl_lib=boringssl'
+      test_targets:
+      - '//:extension_deps_test'

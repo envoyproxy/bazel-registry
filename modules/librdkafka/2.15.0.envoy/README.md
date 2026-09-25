@@ -28,6 +28,6 @@ This is the intended pattern for Envoy's `MODULE.bazel`, where Envoy may not be 
 
 This module is also the reference pattern for replacing `.bazelrc` `label_flag` injection in other Envoy registry modules such as grpc (`third_party:ssl_lib` / `crypto_lib` / `zlib_lib`), protobuf (`//:zlib`), and later quiche, proxy-wasm-cpp-host, libsxg, qatzip, libbpf, and elfutils.
 
-The presubmit keeps the upstream default and no-feature coverage, and adds an extension-configured build-only path that redirects librdkafka to `@boringssl` and `@zlib-ng`.
+The presubmit keeps the upstream default and no-feature coverage, and adds an extension-configured path that redirects librdkafka to `@boringssl` and `@zlib-ng`.
 
-That extension task intentionally stops at building `@librdkafka//:librdkafka` and `@librdkafka//:librdkafka_cpp`: linking standalone test binaries against the current boringssl-backed configuration exposes upstream unresolved TLS symbols (`SSL_CTX_use_cert_and_key`, `RAND_priv_bytes`). Envoy is expected to validate the integrated boringssl/zlib-ng configuration first before proposing this pattern upstream to BCR.
+That extension task builds `@librdkafka//:librdkafka`, `@librdkafka//:librdkafka_cpp`, and a lightweight `//:extension_deps_test` that links only the configured `@librdkafka_deps` aliases. Full standalone librdkafka test binaries are intentionally not enabled on this path yet: linking them against the current boringssl-backed configuration exposes upstream unresolved TLS symbols (`SSL_CTX_use_cert_and_key`, `RAND_priv_bytes`). Envoy is expected to validate the integrated boringssl/zlib-ng configuration first before proposing this pattern upstream to BCR.
