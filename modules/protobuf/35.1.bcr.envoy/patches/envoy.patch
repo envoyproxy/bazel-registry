@@ -28,6 +28,21 @@ index 265652d..11d481e 100644
  alias(
      name = "python_common_test_protos",
      actual = "//python:python_common_test_protos",
+diff --git a/MODULE.bazel b/MODULE.bazel
+index a490e51..1a59e15 100644
+--- a/MODULE.bazel
++++ b/MODULE.bazel
+@@ -194,7 +194,9 @@ rust.toolchain(
+     versions = ["1.85.0"],
+ )
+ 
+-crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
++# Envoy: dev-only, matching the `rust` toolchain extension above. protobuf's
++# Rust bindings under //rust are not consumable from a non-root module.
++crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate", dev_dependency = True)
+ crate.spec(
+     package = "googletest",
+     version = ">0.0.0",
 diff --git a/build_defs/cpp_opts.bzl b/build_defs/cpp_opts.bzl
 index c0116bd..5ce341c 100644
 --- a/build_defs/cpp_opts.bzl
