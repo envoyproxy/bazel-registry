@@ -31,9 +31,9 @@ alias(
 _librdkafka_deps_repo = repository_rule(
     implementation = _librdkafka_deps_repo_impl,
     attrs = {
-        "crypto": attr.label(doc = "Label to alias as :crypto."),
-        "ssl": attr.label(doc = "Label to alias as :ssl."),
-        "zlib": attr.label(doc = "Label to alias as :zlib."),
+        "crypto": attr.label(doc = "Label to alias as :crypto.", providers = [[CcInfo]]),
+        "ssl": attr.label(doc = "Label to alias as :ssl.", providers = [[CcInfo]]),
+        "zlib": attr.label(doc = "Label to alias as :zlib.", providers = [[CcInfo]]),
     },
 )
 

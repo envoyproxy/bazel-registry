@@ -24,11 +24,18 @@ def _dep_paths_impl(ctx):
     expected_zlib = _library_paths(ctx.attr.expected_zlib)
     librdkafka = _library_paths(ctx.attr.rdkafka)
 
-    if alias_crypto.to_list() != expected_crypto.to_list():
+    alias_crypto_paths = {path: True for path in alias_crypto.to_list()}
+    alias_ssl_paths = {path: True for path in alias_ssl.to_list()}
+    alias_zlib_paths = {path: True for path in alias_zlib.to_list()}
+    expected_crypto_paths = {path: True for path in expected_crypto.to_list()}
+    expected_ssl_paths = {path: True for path in expected_ssl.to_list()}
+    expected_zlib_paths = {path: True for path in expected_zlib.to_list()}
+
+    if alias_crypto_paths != expected_crypto_paths:
         fail("Configured crypto alias does not resolve to the expected target")
-    if alias_ssl.to_list() != expected_ssl.to_list():
+    if alias_ssl_paths != expected_ssl_paths:
         fail("Configured ssl alias does not resolve to the expected target")
-    if alias_zlib.to_list() != expected_zlib.to_list():
+    if alias_zlib_paths != expected_zlib_paths:
         fail("Configured zlib alias does not resolve to the expected target")
 
     librdkafka_paths = {path: True for path in librdkafka.to_list()}

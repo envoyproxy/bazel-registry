@@ -5,10 +5,10 @@
     "overlay": {
         "BUILD.bazel": "sha256-NbJwAWqXz1uX1tzA2HliY6WzvziQlh+V8JLva+NRoK4=",
         "MODULE.bazel": "sha256-atwtE8B3dRbnPc9ZTnwXzG77O17gwcT6Up8vWfl1H1s=",
-        "extensions.bzl": "sha256-c+Usf8vS9Vknl19VGGr+M1e6OXA4rxZz12F4m+3HDP4=",
+        "extensions.bzl": "sha256-bAKOOd+OTP0CZ5JVh3gggX7kq8KOg1ShFOt3ag2eis4=",
         "test/BUILD.bazel": "sha256-iviqUQn01qvPX89hjWgIC79zIhVOGmOa6DZUFK3rWq0=",
         "test/MODULE.bazel": "sha256-4q6QiDcwH9dRtKREHBcF49AgVdRxeNQySOUHuHflplg=",
-        "test/dep_paths.bzl": "sha256-x4WCEuL2MWEO9VI2d5blEZvg9h2GzSIDB1PTSusPAQ4=",
+        "test/dep_paths.bzl": "sha256-9OaUFT+LY6Tg9tEaaj4H8Bv4f9iikKbfowF8ZjnE1g4=",
         "test/extension_deps_test.sh": "sha256-0Y7kU+7c8NrAlVCh6PGeYaFlqoMFWdB4QYvsZwfBvS8="
     },
     "patch_strip": 0,
