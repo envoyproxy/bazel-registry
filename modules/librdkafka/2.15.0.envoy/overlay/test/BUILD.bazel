@@ -1,10 +1,15 @@
+load(":dep_paths.bzl", "dep_paths")
+
+dep_paths(
+    name = "extension_dep_paths",
+    crypto = "@librdkafka_deps//:crypto",
+    rdkafka = "@librdkafka//:librdkafka",
+    ssl = "@librdkafka_deps//:ssl",
+    zlib = "@librdkafka_deps//:zlib",
+)
+
 sh_test(
     name = "extension_deps_test",
     srcs = ["extension_deps_test.sh"],
-    data = [
-        "@librdkafka//:librdkafka",
-        "@librdkafka_deps//:crypto",
-        "@librdkafka_deps//:ssl",
-        "@librdkafka_deps//:zlib",
-    ],
+    data = [":extension_dep_paths"],
 )
