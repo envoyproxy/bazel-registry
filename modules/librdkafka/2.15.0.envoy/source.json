@@ -6,10 +6,10 @@
         "BUILD.bazel": "sha256-NbJwAWqXz1uX1tzA2HliY6WzvziQlh+V8JLva+NRoK4=",
         "MODULE.bazel": "sha256-atwtE8B3dRbnPc9ZTnwXzG77O17gwcT6Up8vWfl1H1s=",
         "extensions.bzl": "sha256-XKAJz+C31DENzEcT8/vYa+FcNYo4Rvgc/r3MIOEYnZA=",
-        "test/BUILD.bazel": "sha256-654rBtyK/f0ygmCxKbKOjrnRhRlfXyg1mSO1TOJsefA=",
+        "test/BUILD.bazel": "sha256-iviqUQn01qvPX89hjWgIC79zIhVOGmOa6DZUFK3rWq0=",
         "test/MODULE.bazel": "sha256-4q6QiDcwH9dRtKREHBcF49AgVdRxeNQySOUHuHflplg=",
-        "test/dep_paths.bzl": "sha256-lL7Wh8MVYMi0TY/2PDCxB4lkapo+Yvw1XwKqR5LDB8M=",
-        "test/extension_deps_test.sh": "sha256-pxKhgGsaDgZlNMnoJ6WEGKtrkVVTsS1lnlNZAdItHnc="
+        "test/dep_paths.bzl": "sha256-x4WCEuL2MWEO9VI2d5blEZvg9h2GzSIDB1PTSusPAQ4=",
+        "test/extension_deps_test.sh": "sha256-0Y7kU+7c8NrAlVCh6PGeYaFlqoMFWdB4QYvsZwfBvS8="
     },
     "patch_strip": 0,
     "patches": {

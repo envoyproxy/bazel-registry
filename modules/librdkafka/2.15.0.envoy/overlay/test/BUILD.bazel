@@ -3,6 +3,9 @@ load(":dep_paths.bzl", "dep_paths")
 dep_paths(
     name = "extension_dep_paths",
     crypto = "@librdkafka_deps//:crypto",
+    expected_crypto = "@boringssl//:crypto",
+    expected_ssl = "@boringssl//:ssl",
+    expected_zlib = "@zlib-ng//:zlib-ng",
     rdkafka = "@librdkafka//:librdkafka",
     ssl = "@librdkafka_deps//:ssl",
     zlib = "@librdkafka_deps//:zlib",
