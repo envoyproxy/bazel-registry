@@ -1,29 +1,30 @@
-matrix:
-  platform:
-  - debian11
-  - macos
-  - ubuntu2404
-  bazel:
-  - 8.x
+bcr_test_module:
+  # `test/MODULE.bazel` adds boringssl/zlib-ng and calls `grpc.deps(...)`, so
+  # tasks below run against the extension-configured dependency graph.
+  module_path: test
+  matrix:
+    platform:
+    - debian11
+    - macos
+    - ubuntu2404
+    bazel:
+    - 8.x
 
-tasks:
-  verify_targets:
-    platform: ${{ platform }}
-    bazel: ${{ bazel }}
-    build_flags:
-    - '--cxxopt=-std=c++17'
-    - '--host_cxxopt=-std=c++17'
-    build_targets:
-    - "@grpc//:grpc"
-    - "@grpc//:grpc_unsecure"
-    - "@grpc//:grpc_opencensus_plugin"
-    - "@grpc//:grpc_security_base"
-    - "@grpc//:grpc++"
-    - "@grpc//:grpc++_unsecure"
-    - "@grpc//:grpc++_reflection"
-    - "@grpc//:grpc++_test"
-    - "@grpc//:grpcpp_admin"
-    - "@grpc//:grpcpp_channelz"
-    - "@grpc//:grpcpp_csds"
-    - "@grpc//:grpcpp_orca_service"
-    - "@grpc//examples/protos/..."
+  tasks:
+    verify_targets:
+      platform: ${{ platform }}
+      bazel: ${{ bazel }}
+      build_flags:
+      - '--cxxopt=-std=c++17'
+      - '--host_cxxopt=-std=c++17'
+      build_targets:
+      - '@grpc_deps//:crypto'
+      - '@grpc_deps//:ssl'
+      - '@grpc_deps//:zlib'
+      - '@grpc//third_party:libcrypto'
+      - '@grpc//third_party:libssl'
+      - '@grpc//third_party:madler_zlib'
+      - '@grpc//:grpc'
+      - '@grpc//:grpc++'
+      test_targets:
+      - '//:extension_deps_test'
