@@ -9,6 +9,7 @@
   },
   "overlay": {
     "BUILD.bazel": "sha256-iwihOPe8y81fe6WFrIuZNjHRNn/GD3rvakpKFYh3kgQ=",
+    "cargo-bazel-lock.json": "sha256-c6HMGV8RoW/BHKlubVEREXyyi1FC91GT/m/PeEeyT/w=",
     "crate-patches/BUILD.bazel": "sha256-YlzNmwpgN5l+K1HVurtCInHiu9AmWH7ejEHKRrA7SIU=",
     "crate-patches/libsqlite3-sys-manifest-dir.patch": "sha256-o28S7fIq2xIMkmqQbbwE2XXnnUXAYK422rj36U4E788=",
     "crate-patches/sequoia-ipc-hermetic-capnp.patch": "sha256-pxe3DHHOOY71CZO8vc94UGTRhFpu/ccBMs2RqIa/iAQ=",
