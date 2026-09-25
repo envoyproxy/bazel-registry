@@ -180,7 +180,8 @@ index 78ac01d..eeef238 100644
 
  bool_flag(
      name = "system_icu",
-     build_setting_default = True,
+-    build_setting_default = True,
++    build_setting_default = False,
 +    visibility = ["//visibility:public"],
  )
 
