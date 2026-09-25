@@ -350,7 +350,7 @@ diff -ruN original/extensions.bzl edited/extensions.bzl
 +            "v8_engine",
 +            [(entry.module_name, entry.v8_engine) for entry in root],
 +            [(entry.module_name, entry.v8_engine) for entry in non_root],
-+            Label("//bazel:wee8_no_pointer_compression"),
++            Label("@proxy_wasm_cpp_host//bazel:wee8_no_pointer_compression"),
 +        ),
 +    )
 +

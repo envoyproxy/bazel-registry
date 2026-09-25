@@ -4,6 +4,6 @@
     "strip_prefix": "proxy-wasm-cpp-host-f2db56af443571e92a31c0b877106d9ea96e19ef",
     "patch_strip": 1,
     "patches": {
-        "proxy-wasm-cpp-host.patch": "sha256-r7tN1L6ZW6cnZUgjyGp1lV4dEXWc/IapYsAETHvrXfw="
+        "proxy-wasm-cpp-host.patch": "sha256-8b+ukGKeXrSBbmv8jI77BXzAjJqL1BO2As59B8q5udo="
     }
 }
