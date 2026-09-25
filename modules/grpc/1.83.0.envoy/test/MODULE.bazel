@@ -1,0 +1,14 @@
+bazel_dep(name = "grpc", version = "1.83.0.envoy")
+bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "rules_cc", version = "0.2.19")
+
+bazel_dep(name = "boringssl", version = "0.20260813.0")
+bazel_dep(name = "zlib-ng", version = "2.3.3.bcr.2")
+
+grpc = use_extension("@grpc//:extensions.bzl", "grpc")
+grpc.deps(
+    crypto = "@boringssl//:crypto",
+    ssl = "@boringssl//:ssl",
+    zlib = "@zlib-ng//:zlib-ng",
+)
+use_repo(grpc, "grpc_deps")

@@ -1,8 +1,7 @@
-diff --git a/BUILD b/BUILD
-index 9463257..ed6b18d 100644
---- a/BUILD
-+++ b/BUILD
-@@ -34,7 +34,7 @@ licenses(["reciprocal"])
+diff -ruN a/BUILD b/BUILD
+--- a/BUILD	2026-07-21 09:16:28.000000000 +0000
++++ b/BUILD	2026-09-25 08:01:31.137387405 +0000
+@@ -34,7 +34,7 @@
  package(
      default_visibility = ["//visibility:public"],
      features = [
@@ -11,10 +10,28 @@ index 9463257..ed6b18d 100644
          "parse_headers",
      ],
  )
-diff --git a/bazel/grpc_build_system.bzl b/bazel/grpc_build_system.bzl
-index 83abb9b..45d1387 100644
---- a/bazel/grpc_build_system.bzl
-+++ b/bazel/grpc_build_system.bzl
+diff -ruN a/MODULE.bazel b/MODULE.bazel
+--- a/MODULE.bazel	2026-07-21 09:16:28.000000000 +0000
++++ b/MODULE.bazel	2026-09-25 08:03:48.928209503 +0000
+@@ -14,11 +14,14 @@
+ 
+ module(
+     name = "grpc",
+-    version = "1.83.0",
++    version = "1.83.0.envoy",
+     compatibility_level = 1,
+     repo_name = "com_github_grpc_grpc",
+ )
+ 
++grpc = use_extension("//:extensions.bzl", "grpc")
++use_repo(grpc, "grpc_deps")
++
+ # Regular dependencies
+ # ====================
+ 
+diff -ruN a/bazel/grpc_build_system.bzl b/bazel/grpc_build_system.bzl
+--- a/bazel/grpc_build_system.bzl	2026-07-21 09:16:28.000000000 +0000
++++ b/bazel/grpc_build_system.bzl	2026-09-25 08:01:31.138737643 +0000
 @@ -27,7 +27,6 @@
  Contains macros used throughout the repo.
  """
@@ -23,7 +40,7 @@ index 83abb9b..45d1387 100644
  load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
  load("@build_bazel_rules_apple//apple/testing/default_runner:ios_test_runner.bzl", "ios_test_runner")
  load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
-@@ -207,16 +206,11 @@ def grpc_proto_plugin(name, srcs = [], deps = []):
+@@ -207,16 +206,11 @@
          srcs = srcs,
          deps = deps,
      )
@@ -40,11 +57,176 @@ index 83abb9b..45d1387 100644
              "//conditions:default": [name + "_native"],
          }),
          outs = [name + "_binary"],
-diff --git a/src/core/BUILD b/src/core/BUILD
-index b5c2cfb..75de7d9 100644
---- a/src/core/BUILD
-+++ b/src/core/BUILD
-@@ -29,7 +29,7 @@ licenses(["reciprocal"])
+diff -ruN a/envoy_deps.bzl b/envoy_deps.bzl
+--- a/envoy_deps.bzl	1970-01-01 00:00:00.000000000 +0000
++++ b/envoy_deps.bzl	2026-09-25 08:06:58.559065349 +0000
+@@ -0,0 +1,57 @@
++"""Shared dependency-injection helpers for Envoy registry modules.
++
++This file is duplicated verbatim across the Envoy librdkafka/grpc/protobuf
++modules. Keep the copies identical so they can be consolidated later.
++"""
++
++def envoy_value(tag, name):
++    return getattr(tag, name, None)
++
++
++def envoy_module_id(mod):
++    if mod.version:
++        return "%s@%s" % (mod.name, mod.version)
++    return mod.name
++
++
++def _canonical_label(label):
++    if label == None:
++        return None
++    return str(label)
++
++
++def _pick_one(extension_name, attr_name, values):
++    chosen = None
++    chosen_module = None
++    chosen_canonical = None
++    for module_name, label in values:
++        if label == None:
++            continue
++        canonical = _canonical_label(label)
++        if chosen == None:
++            chosen = label
++            chosen_module = module_name
++            chosen_canonical = canonical
++            continue
++        if chosen_canonical != canonical:
++            fail(
++                "Conflicting %s.deps(%s=...) labels from modules %s (%s) and %s (%s)." % (
++                    extension_name,
++                    attr_name,
++                    chosen_module,
++                    chosen_canonical,
++                    module_name,
++                    canonical,
++                ),
++            )
++    return chosen
++
++
++def envoy_pick(extension_name, attr_name, root_values, non_root_values, default):
++    chosen = _pick_one(extension_name, attr_name, root_values)
++    if chosen != None:
++        return chosen
++    chosen = _pick_one(extension_name, attr_name, non_root_values)
++    if chosen != None:
++        return chosen
++    return default
+diff -ruN a/extensions.bzl b/extensions.bzl
+--- a/extensions.bzl	1970-01-01 00:00:00.000000000 +0000
++++ b/extensions.bzl	2026-09-25 08:06:58.559363964 +0000
+@@ -0,0 +1,101 @@
++"""Module extension for configuring grpc dependency aliases."""
++
++load("//:envoy_deps.bzl", "envoy_module_id", "envoy_pick", "envoy_value")
++
++
++def _grpc_deps_repo_impl(repo_ctx):
++    repo_ctx.file(
++        "BUILD.bazel",
++        """alias(
++    name = "crypto",
++    actual = "{crypto}",
++    visibility = ["//visibility:public"],
++)
++
++alias(
++    name = "ssl",
++    actual = "{ssl}",
++    visibility = ["//visibility:public"],
++)
++
++alias(
++    name = "zlib",
++    actual = "{zlib}",
++    visibility = ["//visibility:public"],
++)
++""".format(
++            crypto = str(repo_ctx.attr.crypto),
++            ssl = str(repo_ctx.attr.ssl),
++            zlib = str(repo_ctx.attr.zlib),
++        ),
++    )
++
++
++_grpc_deps_repo = repository_rule(
++    implementation = _grpc_deps_repo_impl,
++    attrs = {
++        "crypto": attr.label(doc = "Label to alias as :crypto."),
++        "ssl": attr.label(doc = "Label to alias as :ssl."),
++        "zlib": attr.label(doc = "Label to alias as :zlib."),
++    },
++)
++
++
++def _grpc_impl(module_ctx):
++    root = []
++    non_root = []
++    for mod in module_ctx.modules:
++        for tag in mod.tags.deps:
++            values = struct(
++                module_name = envoy_module_id(mod),
++                crypto = envoy_value(tag, "crypto"),
++                ssl = envoy_value(tag, "ssl"),
++                zlib = envoy_value(tag, "zlib"),
++            )
++            if mod.is_root:
++                root.append(values)
++            else:
++                non_root.append(values)
++
++    _grpc_deps_repo(
++        name = "grpc_deps",
++        crypto = envoy_pick(
++            "grpc",
++            "crypto",
++            [(entry.module_name, entry.crypto) for entry in root],
++            [(entry.module_name, entry.crypto) for entry in non_root],
++            Label("@boringssl//:crypto"),
++        ),
++        ssl = envoy_pick(
++            "grpc",
++            "ssl",
++            [(entry.module_name, entry.ssl) for entry in root],
++            [(entry.module_name, entry.ssl) for entry in non_root],
++            Label("@boringssl//:ssl"),
++        ),
++        zlib = envoy_pick(
++            "grpc",
++            "zlib",
++            [(entry.module_name, entry.zlib) for entry in root],
++            [(entry.module_name, entry.zlib) for entry in non_root],
++            Label("@zlib//:zlib"),
++        ),
++    )
++
++    return module_ctx.extension_metadata(reproducible = True)
++
++
++deps = tag_class(
++    attrs = {
++        "crypto": attr.label(doc = "Optional label to use for grpc's crypto dependency."),
++        "ssl": attr.label(doc = "Optional label to use for grpc's TLS/SSL dependency."),
++        "zlib": attr.label(doc = "Optional label to use for grpc's zlib dependency."),
++    },
++    doc = "Configures the dependency labels used by grpc.",
++)
++
++grpc = module_extension(
++    implementation = _grpc_impl,
++    tag_classes = {"deps": deps},
++    doc = "Creates @grpc_deps aliases for grpc's configurable deps.",
++)
+diff -ruN a/src/core/BUILD b/src/core/BUILD
+--- a/src/core/BUILD	2026-07-21 09:16:28.000000000 +0000
++++ b/src/core/BUILD	2026-09-25 08:01:31.139341265 +0000
+@@ -29,7 +29,7 @@
  package(
      default_visibility = ["//:__subpackages__"],
      features = [
@@ -53,11 +235,10 @@ index b5c2cfb..75de7d9 100644
          "parse_headers",
      ],
  )
-diff --git a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promise/detail/promise_factory.h
-index 005171e..dc8f387 100644
---- a/src/core/lib/promise/detail/promise_factory.h
-+++ b/src/core/lib/promise/detail/promise_factory.h
-@@ -126,7 +126,6 @@ struct OnceToken {};
+diff -ruN a/src/core/lib/promise/detail/promise_factory.h b/src/core/lib/promise/detail/promise_factory.h
+--- a/src/core/lib/promise/detail/promise_factory.h	2026-07-21 09:16:28.000000000 +0000
++++ b/src/core/lib/promise/detail/promise_factory.h	2026-09-25 08:01:31.139880367 +0000
+@@ -126,7 +126,6 @@
  // Promote a callable(A) -> T | Poll<T> to a PromiseFactory(A) -> Promise<T> by
  // capturing A.
  template <typename Token, typename A, typename F>
@@ -65,7 +246,7 @@ index 005171e..dc8f387 100644
      absl::enable_if_t<!IsVoidCallable<ResultOf<F(A)>>::value,
                        PromiseLike<Curried<RemoveCVRef<F>, A>>>
      PromiseFactoryImpl(Token, F&& f, A&& arg) {
-@@ -142,7 +141,7 @@ GPR_ATTRIBUTE_ALWAYS_INLINE_FUNCTION
+@@ -142,7 +141,7 @@
  // Promote a callable() -> T|Poll<T> to a PromiseFactory(A) -> Promise<T>
  // by dropping the argument passed to the factory.
  template <typename A, typename F>
@@ -74,7 +255,7 @@ index 005171e..dc8f387 100644
      !IsVoidCallable<ResultOf<F()>>::value, PromiseLike<RemoveCVRef<F>>>
  PromiseFactoryImpl(OnceToken, F&& f, A&&) {
    return PromiseLike<F>(std::forward<RemoveCVRef<F>>(f));
-@@ -150,7 +149,7 @@ PromiseFactoryImpl(OnceToken, F&& f, A&&) {
+@@ -150,7 +149,7 @@
  
  // Promote a callable() -> Poll<T> to a PromiseFactory() -> Promise<T>
  template <typename F>
@@ -83,7 +264,7 @@ index 005171e..dc8f387 100644
      !IsVoidCallable<ResultOf<F()>>::value &&
          PollTraits<ResultOf<F()>>::is_poll(),
      PromiseLike<RemoveCVRef<F>>>
-@@ -160,7 +159,7 @@ PromiseFactoryImpl(OnceToken, F&& f) {
+@@ -160,7 +159,7 @@
  
  // Promote a callable() -> T to a PromiseFactory() -> Immediate<T>
  template <typename F>
@@ -92,7 +273,7 @@ index 005171e..dc8f387 100644
      std::enable_if_t<!IsVoidCallable<ResultOf<F()>>::value &&
                           !PollTraits<ResultOf<F()>>::is_poll() &&
                           !std::is_same_v<ResultOf<F()>, void>,
-@@ -170,7 +169,7 @@ GPR_ATTRIBUTE_ALWAYS_INLINE_FUNCTION inline auto PromiseFactoryImpl(
+@@ -170,7 +169,7 @@
    return PromiseLike<decltype(f2)>(std::move(f2));
  }
  template <typename F>
@@ -101,7 +282,7 @@ index 005171e..dc8f387 100644
      std::enable_if_t<!IsVoidCallable<ResultOf<F()>>::value &&
                           !PollTraits<ResultOf<F()>>::is_poll() &&
                           std::is_same_v<ResultOf<F()>, void>,
-@@ -183,7 +182,7 @@ GPR_ATTRIBUTE_ALWAYS_INLINE_FUNCTION inline auto PromiseFactoryImpl(
+@@ -183,7 +182,7 @@
  
  // Given a callable(A) -> Promise<T>, name it a PromiseFactory and use it.
  template <typename Token, typename A, typename F>
@@ -110,7 +291,7 @@ index 005171e..dc8f387 100644
      IsVoidCallable<ResultOf<F(A)>>::value,
      PromiseLike<decltype(std::declval<F>()(std::declval<A>()))>>
  PromiseFactoryImpl(Token, F&& f, A&& arg) {
-@@ -193,7 +192,7 @@ PromiseFactoryImpl(Token, F&& f, A&& arg) {
+@@ -193,7 +192,7 @@
  
  // Given a callable(A) -> Promise<T>, name it a PromiseFactory and use it.
  template <typename Token, typename A, typename F>
@@ -119,7 +300,7 @@ index 005171e..dc8f387 100644
      IsVoidCallable<ResultOf<F(A)>>::value,
      PromiseLike<decltype(std::declval<F>()(std::declval<A>()))>>
  PromiseFactoryImpl(Token, F& f, A&& arg) {
-@@ -204,7 +203,7 @@ PromiseFactoryImpl(Token, F& f, A&& arg) {
+@@ -204,7 +203,7 @@
  // Given a callable() -> Promise<T>, promote it to a
  // PromiseFactory(A) -> Promise<T> by dropping the first argument.
  template <typename Token, typename A, typename F>
@@ -128,7 +309,7 @@ index 005171e..dc8f387 100644
      IsVoidCallable<ResultOf<F()>>::value,
      PromiseLike<decltype(std::declval<F>()())>>
  PromiseFactoryImpl(Token, F&& f, A&&) {
-@@ -214,7 +213,7 @@ PromiseFactoryImpl(Token, F&& f, A&&) {
+@@ -214,7 +213,7 @@
  
  // Given a callable() -> Promise<T>, name it a PromiseFactory and use it.
  template <typename Token, typename F>
@@ -137,7 +318,7 @@ index 005171e..dc8f387 100644
      IsVoidCallable<ResultOf<F()>>::value,
      PromiseLike<decltype(std::declval<F>()())>>
  PromiseFactoryImpl(Token, F&& f) {
-@@ -236,10 +235,10 @@ class OncePromiseFactory {
+@@ -236,10 +235,10 @@
                                                std::declval<A>()));
    using UnderlyingFactory = F;
  
@@ -150,7 +331,7 @@ index 005171e..dc8f387 100644
      return PromiseFactoryImpl(OnceToken{}, std::move(f_), std::forward<Arg>(a));
    }
  };
-@@ -254,10 +253,10 @@ class OncePromiseFactory<void, F> {
+@@ -254,10 +253,10 @@
    using Promise = decltype(PromiseFactoryImpl(OnceToken{}, std::move(f_)));
    using UnderlyingFactory = F;
  
@@ -163,7 +344,7 @@ index 005171e..dc8f387 100644
      return PromiseFactoryImpl(OnceToken{}, std::move(f_));
    }
  };
-@@ -276,21 +275,21 @@ class RepeatedPromiseFactory {
+@@ -276,21 +275,21 @@
    using Promise =
        decltype(PromiseFactoryImpl(RepeatableToken{}, f_, std::declval<A>()));
  
@@ -190,7 +371,7 @@ index 005171e..dc8f387 100644
      return PromiseFactoryImpl(RepeatableToken{}, f_, std::forward<U>(u));
    }
  };
-@@ -304,13 +303,13 @@ class RepeatedPromiseFactory<void, F> {
+@@ -304,13 +303,13 @@
    using Arg = void;
    using Promise = decltype(PromiseFactoryImpl(RepeatableToken{}, f_));
  
@@ -207,11 +388,10 @@ index 005171e..dc8f387 100644
      return PromiseFactoryImpl(RepeatableToken{}, f_);
    }
  };
-diff --git a/src/core/tsi/ssl_transport_security.cc b/src/core/tsi/ssl_transport_security.cc
-index 922bb83..beb8765 100644
---- a/src/core/tsi/ssl_transport_security.cc
-+++ b/src/core/tsi/ssl_transport_security.cc
-@@ -441,7 +441,8 @@ tsi_result SetKeyExchangeGroups(
+diff -ruN a/src/core/tsi/ssl_transport_security.cc b/src/core/tsi/ssl_transport_security.cc
+--- a/src/core/tsi/ssl_transport_security.cc	2026-07-21 09:16:28.000000000 +0000
++++ b/src/core/tsi/ssl_transport_security.cc	2026-09-25 08:01:31.140145219 +0000
+@@ -441,7 +441,8 @@
      }
  #if OPENSSL_VERSION_NUMBER >= 0x10101000L
      std::string group_list_str = absl::StrJoin(group_names, ":");
@@ -221,89 +401,9 @@ index 922bb83..beb8765 100644
        LOG(ERROR) << "Could not set key exchange groups: " << group_list_str;
        return TSI_INTERNAL_ERROR;
      }
-diff --git a/src/proto/grpc/health/v1/BUILD b/src/proto/grpc/health/v1/BUILD
-index 23a836b..25283f2 100644
---- a/src/proto/grpc/health/v1/BUILD
-+++ b/src/proto/grpc/health/v1/BUILD
-@@ -49,3 +49,10 @@ filegroup(
-         "health.proto",
-     ],
- )
-+
-+# This alias is required by Envoy
-+alias(
-+    name = "_health_proto_only",
-+    actual = ":health_proto",
-+    visibility = ["//visibility:public"],
-+)
-diff --git a/third_party/BUILD b/third_party/BUILD
-index ff2dcae..561edfc 100644
---- a/third_party/BUILD
-+++ b/third_party/BUILD
-@@ -30,27 +30,55 @@ config_setting(
-     flag_values = {":grpc_use_openssl": "true"},
- )
- 
-+label_flag(
-+    name = "ssl_lib",
-+    build_setting_default = ":_default_ssl",
-+    visibility = ["//visibility:public"],
-+)
-+
-+label_flag(
-+    name = "crypto_lib",
-+    build_setting_default = ":_default_crypto",
-+    visibility = ["//visibility:public"],
-+)
-+
-+label_flag(
-+    name = "zlib_lib",
-+    build_setting_default = "@zlib//:zlib",
-+    visibility = ["//visibility:public"],
-+)
-+
- alias(
--    name = "libssl",
-+    name = "_default_ssl",
-     actual = select({
-         ":grpc_use_openssl_setting": "@openssl//:ssl",
-         "//conditions:default": "@boringssl//:ssl",
-     }),
--    tags = ["manual"],
- )
- 
- alias(
--    name = "libcrypto",
-+    name = "_default_crypto",
-     actual = select({
-         ":grpc_use_openssl_setting": "@openssl//:crypto",
-         "//conditions:default": "@boringssl//:crypto",
-     }),
-+)
-+
-+alias(
-+    name = "libssl",
-+    actual = ":ssl_lib",
-+    tags = ["manual"],
-+)
-+
-+alias(
-+    name = "libcrypto",
-+    actual = ":crypto_lib",
-     tags = ["manual"],
- )
- 
- alias(
-     name = "madler_zlib",
--    actual = "@zlib//:zlib",
-+    actual = ":zlib_lib",
-     tags = ["manual"],
- )
-
-diff --git a/src/proto/grpc/gcp/BUILD b/src/proto/grpc/gcp/BUILD
-index 7e432b6..f704d5f 100644
---- a/src/proto/grpc/gcp/BUILD
-+++ b/src/proto/grpc/gcp/BUILD
+diff -ruN a/src/proto/grpc/gcp/BUILD b/src/proto/grpc/gcp/BUILD
+--- a/src/proto/grpc/gcp/BUILD	2026-07-21 09:16:28.000000000 +0000
++++ b/src/proto/grpc/gcp/BUILD	2026-09-25 08:01:31.140547536 +0000
 @@ -12,7 +12,9 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
@@ -334,3 +434,49 @@ index 7e432b6..f704d5f 100644
 +    grpc_only = True,
 +    visibility = ["//visibility:public"],
 +)
+diff -ruN a/src/proto/grpc/health/v1/BUILD b/src/proto/grpc/health/v1/BUILD
+--- a/src/proto/grpc/health/v1/BUILD	2026-07-21 09:16:28.000000000 +0000
++++ b/src/proto/grpc/health/v1/BUILD	2026-09-25 08:01:31.140397868 +0000
+@@ -49,3 +49,10 @@
+         "health.proto",
+     ],
+ )
++
++# This alias is required by Envoy
++alias(
++    name = "_health_proto_only",
++    actual = ":health_proto",
++    visibility = ["//visibility:public"],
++)
+diff -ruN a/third_party/BUILD b/third_party/BUILD
+--- a/third_party/BUILD	2026-07-21 09:16:28.000000000 +0000
++++ b/third_party/BUILD	2026-09-25 08:03:04.059790716 +0000
+@@ -32,25 +32,19 @@
+ 
+ alias(
+     name = "libssl",
+-    actual = select({
+-        ":grpc_use_openssl_setting": "@openssl//:ssl",
+-        "//conditions:default": "@boringssl//:ssl",
+-    }),
++    actual = "@grpc_deps//:ssl",
+     tags = ["manual"],
+ )
+ 
+ alias(
+     name = "libcrypto",
+-    actual = select({
+-        ":grpc_use_openssl_setting": "@openssl//:crypto",
+-        "//conditions:default": "@boringssl//:crypto",
+-    }),
++    actual = "@grpc_deps//:crypto",
+     tags = ["manual"],
+ )
+ 
+ alias(
+     name = "madler_zlib",
+-    actual = "@zlib//:zlib",
++    actual = "@grpc_deps//:zlib",
+     tags = ["manual"],
+ )
+ 
