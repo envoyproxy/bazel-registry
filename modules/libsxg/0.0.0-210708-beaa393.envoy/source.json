@@ -6,6 +6,6 @@
         "BUILD.bazel": "sha256-v6Nnhskqw+ekBOEOJIKdVtvFsHJ3pDmTqc4gl3RjTxo=",
         "include/libsxg.h": "sha256-yvW4je5JO/hZ69v1dJgXtPrUbuEjYXJdWzteLY1TXuA=",
         "envoy_deps.bzl": "sha256-rgNPuv1jDB4Bsy6EtWgjlKJnOrpWSKD6WuRNvQX4bHQ=",
-        "extensions.bzl": "sha256-nYreK5ep2pQiuFVYsAHs8IAP9HvoaKj7lOHLJ4JByzA="
+        "extensions.bzl": "sha256-e5VTx53PuR9CfatC1rrj4qDl24aiM43kIKGQDmi5Jcg="
     }
 }

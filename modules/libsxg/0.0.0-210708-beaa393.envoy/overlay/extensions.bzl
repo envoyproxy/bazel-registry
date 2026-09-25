@@ -44,7 +44,7 @@ def _libsxg_impl(module_ctx):
             "crypto_lib",
             [(entry.module_name, entry.crypto_lib) for entry in root],
             [(entry.module_name, entry.crypto_lib) for entry in non_root],
-            Label("@boringssl//:crypto"),
+            "@@boringssl+//:crypto",
         )),
     )
 
