@@ -45,3 +45,4 @@ bcr_test_module:
       - '--@curl//:ssl_lib=boringssl'
       build_targets:
       - '@librdkafka//:librdkafka'
+      - '@librdkafka//:librdkafka_cpp'
