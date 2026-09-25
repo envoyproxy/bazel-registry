@@ -18,7 +18,7 @@ def _libsxg_deps_repo_impl(repo_ctx):
 _libsxg_deps_repo = repository_rule(
     implementation = _libsxg_deps_repo_impl,
     attrs = {
-        "crypto_lib": attr.label(doc = "Label to alias as :crypto_lib."),
+        "crypto_lib": attr.string(doc = "Label to alias as :crypto_lib."),
     },
 )
 
@@ -39,13 +39,13 @@ def _libsxg_impl(module_ctx):
 
     _libsxg_deps_repo(
         name = "libsxg_deps",
-        crypto_lib = envoy_pick(
+        crypto_lib = str(envoy_pick(
             "libsxg",
             "crypto_lib",
             [(entry.module_name, entry.crypto_lib) for entry in root],
             [(entry.module_name, entry.crypto_lib) for entry in non_root],
             Label("@boringssl//:crypto"),
-        ),
+        )),
     )
 
     return module_ctx.extension_metadata(reproducible = True)
