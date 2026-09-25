@@ -1,3 +1,22 @@
+diff -Naur a/toolchain/config/BUILD.bazel b/toolchain/config/BUILD.bazel
+--- a/toolchain/config/BUILD.bazel
++++ b/toolchain/config/BUILD.bazel
+@@ -17,13 +17,13 @@
+ 
+ bool_flag(
+     name = "libunwind",
+-    build_setting_default = True,
++    build_setting_default = False,
+     visibility = ["//visibility:public"],
+ )
+ 
+ bool_flag(
+     name = "compiler-rt",
+-    build_setting_default = True,
++    build_setting_default = False,
+     visibility = ["//visibility:public"],
+ )
+ 
 diff -Naur a/toolchain/cc_toolchain_config.bzl b/toolchain/cc_toolchain_config.bzl
 --- a/toolchain/cc_toolchain_config.bzl
 +++ b/toolchain/cc_toolchain_config.bzl
