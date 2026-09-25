@@ -343,7 +343,7 @@ diff -ruN original/extensions.bzl edited/extensions.bzl
 +            "wasmedge_lib",
 +            [(entry.module_name, entry.wasmedge_lib) for entry in root],
 +            [(entry.module_name, entry.wasmedge_lib) for entry in non_root],
-+            Label("//bazel:default_wasmedge_lib"),
++            Label("@proxy_wasm_cpp_host//bazel:default_wasmedge_lib"),
 +        ),
 +        v8_engine = envoy_pick(
 +            "proxy_wasm_cpp_host",
