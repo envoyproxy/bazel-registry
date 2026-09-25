@@ -6,9 +6,9 @@
         "BUILD.bazel": "sha256-NbJwAWqXz1uX1tzA2HliY6WzvziQlh+V8JLva+NRoK4=",
         "MODULE.bazel": "sha256-atwtE8B3dRbnPc9ZTnwXzG77O17gwcT6Up8vWfl1H1s=",
         "extensions.bzl": "sha256-PExYSmOC44s4l92hS5AAS54PaiWJyXdE2heRz9gU7AI=",
-        "test/BUILD.bazel": "sha256-G9F/OHR9p+SKFfpq2s4w6XzkEY8R5y7LGZVxhOJ1zL4=",
+        "test/BUILD.bazel": "sha256-7UBbE8/8nxOVfWcu4X9CYq9oHAgEPLvxfdLjx0tbEaA=",
         "test/MODULE.bazel": "sha256-4q6QiDcwH9dRtKREHBcF49AgVdRxeNQySOUHuHflplg=",
-        "test/extension_deps_test.cc": "sha256-5X7f7COh8hZUY1kzCzG1wDYWrQUpKSIw3SDo2jsmx8E="
+        "test/extension_deps_test.sh": "sha256-Uiz7bCjPId9uBgxItEo5HkpLcaN7+jYAgHhADhCF48o="
     },
     "patch_strip": 0,
     "patches": {
