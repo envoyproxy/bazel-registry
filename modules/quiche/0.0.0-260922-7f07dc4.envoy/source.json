@@ -7,7 +7,9 @@
         "delete-bazel-files.patch": "sha256-pPXq5RbMW5YpJdq/gcGZwmZghwRPIW3lMzlW4xd2x3U="
     },
     "overlay": {
-        "BUILD.bazel": "sha256-WjXbPYxuLjGDeL+kX62U5vuCljk6djnULMReQ43FhMo=",
-        "quiche_overlay.bzl": "sha256-9UG0IONXc3eyE6nV21WO96HqkM0zISBGbyOZbEBVQ9Y="
+        "BUILD.bazel": "sha256-btTDxyldxuIttWMBG22iw/bnNT23fEtm0GsYbYXx+vg=",
+        "quiche_overlay.bzl": "sha256-/YKqiZdkhQa1xXOeJJmDJD57TbVlNKVrTm+YBmQcO1w=",
+        "extensions.bzl": "sha256-CMNzHyry4UGLTGqH1aRFngZjdz3WEpDwipdJyIId3t0=",
+        "envoy_deps.bzl": "sha256-iSZdcoZ4fJTDsezIPLhCZV0FUZQo92gGpmWPJHCK+ak="
     }
 }
