@@ -279,12 +279,12 @@ diff -ruN original/extensions.bzl edited/extensions.bzl
 +_proxy_wasm_cpp_host_deps_repo = repository_rule(
 +    implementation = _proxy_wasm_cpp_host_deps_repo_impl,
 +    attrs = {
-+        "crypto_lib": attr.label(doc = "Label to alias as :crypto_lib."),
-+        "wamr_lib": attr.label(doc = "Label to alias as :wamr_lib."),
-+        "wasmtime_lib": attr.label(doc = "Label to alias as :wasmtime_lib."),
-+        "prefixed_wasmtime_lib": attr.label(doc = "Label to alias as :prefixed_wasmtime_lib."),
-+        "wasmedge_lib": attr.label(doc = "Label to alias as :wasmedge_lib."),
-+        "v8_engine": attr.label(doc = "Label to alias as :v8_engine."),
++        "crypto_lib": attr.string(doc = "Label to alias as :crypto_lib."),
++        "wamr_lib": attr.string(doc = "Label to alias as :wamr_lib."),
++        "wasmtime_lib": attr.string(doc = "Label to alias as :wasmtime_lib."),
++        "prefixed_wasmtime_lib": attr.string(doc = "Label to alias as :prefixed_wasmtime_lib."),
++        "wasmedge_lib": attr.string(doc = "Label to alias as :wasmedge_lib."),
++        "v8_engine": attr.string(doc = "Label to alias as :v8_engine."),
 +    },
 +)
 +
@@ -310,48 +310,48 @@ diff -ruN original/extensions.bzl edited/extensions.bzl
 +
 +    _proxy_wasm_cpp_host_deps_repo(
 +        name = "proxy_wasm_cpp_host_deps",
-+        crypto_lib = envoy_pick(
++        crypto_lib = str(envoy_pick(
 +            "proxy_wasm_cpp_host",
 +            "crypto_lib",
 +            [(entry.module_name, entry.crypto_lib) for entry in root],
 +            [(entry.module_name, entry.crypto_lib) for entry in non_root],
 +            Label("@boringssl//:crypto"),
-+        ),
-+        wamr_lib = envoy_pick(
++        )),
++        wamr_lib = str(envoy_pick(
 +            "proxy_wasm_cpp_host",
 +            "wamr_lib",
 +            [(entry.module_name, entry.wamr_lib) for entry in root],
 +            [(entry.module_name, entry.wamr_lib) for entry in non_root],
 +            Label("@com_github_bytecodealliance_wasm_micro_runtime//:wamr_lib"),
-+        ),
-+        wasmtime_lib = envoy_pick(
++        )),
++        wasmtime_lib = str(envoy_pick(
 +            "proxy_wasm_cpp_host",
 +            "wasmtime_lib",
 +            [(entry.module_name, entry.wasmtime_lib) for entry in root],
 +            [(entry.module_name, entry.wasmtime_lib) for entry in non_root],
 +            Label("@com_github_wasmtime//:wasmtime_lib"),
-+        ),
-+        prefixed_wasmtime_lib = envoy_pick(
++        )),
++        prefixed_wasmtime_lib = str(envoy_pick(
 +            "proxy_wasm_cpp_host",
 +            "prefixed_wasmtime_lib",
 +            [(entry.module_name, entry.prefixed_wasmtime_lib) for entry in root],
 +            [(entry.module_name, entry.prefixed_wasmtime_lib) for entry in non_root],
 +            Label("@com_github_wasmtime//:prefixed_wasmtime_lib"),
-+        ),
-+        wasmedge_lib = envoy_pick(
++        )),
++        wasmedge_lib = str(envoy_pick(
 +            "proxy_wasm_cpp_host",
 +            "wasmedge_lib",
 +            [(entry.module_name, entry.wasmedge_lib) for entry in root],
 +            [(entry.module_name, entry.wasmedge_lib) for entry in non_root],
-+            Label("@@proxy-wasm-cpp-host+//bazel:default_wasmedge_lib"),
-+        ),
-+        v8_engine = envoy_pick(
++            "@@proxy-wasm-cpp-host+//bazel:default_wasmedge_lib",
++        )),
++        v8_engine = str(envoy_pick(
 +            "proxy_wasm_cpp_host",
 +            "v8_engine",
 +            [(entry.module_name, entry.v8_engine) for entry in root],
 +            [(entry.module_name, entry.v8_engine) for entry in non_root],
-+            Label("@@proxy-wasm-cpp-host+//bazel:wee8_no_pointer_compression"),
-+        ),
++            "@@proxy-wasm-cpp-host+//bazel:wee8_no_pointer_compression",
++        )),
 +    )
 +
 +    return module_ctx.extension_metadata(reproducible = True)
