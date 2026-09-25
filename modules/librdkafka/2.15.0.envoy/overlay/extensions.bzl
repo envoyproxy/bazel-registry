@@ -122,9 +122,9 @@ def _librdkafka_impl(module_ctx):
 
 configure = tag_class(
     attrs = {
-        "crypto": attr.label(doc = "Optional label to use for librdkafka's crypto dependency."),
-        "ssl": attr.label(doc = "Optional label to use for librdkafka's TLS/SSL dependency."),
-        "zlib": attr.label(doc = "Optional label to use for librdkafka's zlib dependency."),
+        "crypto": attr.label(doc = "Optional label to use for librdkafka's crypto dependency.", providers = [[CcInfo]]),
+        "ssl": attr.label(doc = "Optional label to use for librdkafka's TLS/SSL dependency.", providers = [[CcInfo]]),
+        "zlib": attr.label(doc = "Optional label to use for librdkafka's zlib dependency.", providers = [[CcInfo]]),
     },
     doc = "Configures the TLS and zlib labels used by the librdkafka overlay.",
 )
