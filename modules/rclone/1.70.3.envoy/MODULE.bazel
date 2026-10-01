@@ -1,0 +1,40 @@
+module(
+    name = "rclone",
+    version = "1.70.3.envoy",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "platforms", version = "1.0.0")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+_VERSION = "1.70.3"
+
+# Keep in sync with https://downloads.rclone.org/v1.70.3/SHA256SUMS.
+_PLATFORMS = {
+    "linux-amd64": ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+    "linux-arm64": ["@platforms//os:linux", "@platforms//cpu:arm64"],
+    "osx-amd64": ["@platforms//os:macos", "@platforms//cpu:x86_64"],
+    "osx-arm64": ["@platforms//os:macos", "@platforms//cpu:arm64"],
+}
+
+_SHA256 = {
+    "linux-amd64": "7d69057e69385f6514a9684c7eaa424d972096b130284bb34dd967c4ed4f9dad",
+    "linux-arm64": "1b08be34622f1f9bb9b069a85d036bba822b690790215c18a9418dbaf19505fe",
+    "osx-amd64": "1616b25d5c5fd07a52498d09480a4fdbeb42e0d21cd3246d2d7df5dddd5ce35a",
+    "osx-arm64": "14a9c5eb9f699a749470c898974412092eee204d74d3395486e3307c255021f7",
+}
+
+[
+    http_archive(
+        name = "rclone_" + platform,
+        build_file_content = """\
+exports_files(["rclone"], visibility = ["//visibility:public"])
+""",
+        sha256 = _SHA256[platform],
+        strip_prefix = "rclone-v{}-{}".format(_VERSION, platform),
+        url = "https://downloads.rclone.org/v{}/rclone-v{}-{}.zip".format(_VERSION, _VERSION, platform),
+    )
+    for platform in _PLATFORMS
+]
