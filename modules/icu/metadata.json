@@ -11,7 +11,8 @@
         "github:unicode-org/icu"
     ],
     "versions": [
-        "78.2.envoy"
+        "78.2.envoy",
+        "78.2.envoy.1"
     ],
     "yanked_versions": {}
 }
