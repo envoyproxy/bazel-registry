@@ -1,9 +1,5 @@
 diff --git a/src/lookup.cc b/src/lookup.cc
 --- a/src/lookup.cc
 +++ b/src/lookup.cc
-@@ -47,6 +47,7 @@ ObjectDef *UniqueType::objectDef()
- 
- 	/* This should have generated a compiler error. */
- 	assert( false );
+@@ -49,0 +50 @@
 +	return 0;
- }
