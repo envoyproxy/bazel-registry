@@ -1,0 +1,17 @@
+{
+    "homepage": "https://github.com/google/brotli",
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
+    "repository": [
+        "github:google/brotli"
+    ],
+    "versions": [
+        "1.2.0-260930-42a2ed4.envoy"
+    ],
+    "yanked_versions": {}
+}
