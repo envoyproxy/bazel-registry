@@ -11,7 +11,8 @@
         "github:openssl/openssl"
     ],
     "versions": [
-        "3.5.7.envoy"
+        "3.5.7.envoy",
+        "3.5.9.envoy"
     ],
     "yanked_versions": {}
 }

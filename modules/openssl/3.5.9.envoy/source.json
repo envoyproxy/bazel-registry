@@ -1,0 +1,9 @@
+{
+    "url": "https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz",
+    "integrity": "sha256-YD9WAuLu8A13+9Qp003NWCK7MBdXobyc2yTGcPHrhZo=",
+    "strip_prefix": "openssl-3.5.9",
+    "overlay": {
+        "BUILD.bazel": "sha256-9QY2nnjW7WdphtUYwMfr9rVX/SmmzZIEfhJ44yYLEvs="
+    },
+    "patch_strip": 1
+}
