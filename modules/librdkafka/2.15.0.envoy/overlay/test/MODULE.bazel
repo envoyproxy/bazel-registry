@@ -1,0 +1,18 @@
+bazel_dep(name = "librdkafka", version = "2.15.0.envoy")
+local_path_override(
+    module_name = "librdkafka",
+    path = "..",
+)
+
+bazel_dep(name = "curl", version = "8.12.0.bcr.1")
+
+bazel_dep(name = "boringssl", version = "0.20250514.0")
+bazel_dep(name = "zlib-ng", version = "2.3.3.bcr.2")
+
+librdkafka = use_extension("@librdkafka//:extensions.bzl", "librdkafka")
+librdkafka.configure(
+    crypto = "@boringssl//:crypto",
+    ssl = "@boringssl//:ssl",
+    zlib = "@zlib-ng//:zlib-ng",
+)
+use_repo(librdkafka, "librdkafka_deps")
