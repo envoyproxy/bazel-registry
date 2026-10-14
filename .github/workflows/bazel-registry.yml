@@ -37,6 +37,31 @@ jobs:
       run: python3 .github/workflows/registry_select_test.py
     - name: Test registry prune plan
       run: bash .github/workflows/registry_prune_plan_test.sh
+    - name: Test registry immutability
+      run: bash .github/workflows/registry_immutability_test.sh
+    - name: Fetch release tags
+      run: git fetch --force --tags origin
+    - name: Resolve published baseline
+      id: baseline
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        published_ref="$(gh release view \
+            --json tagName \
+            --jq '.tagName // ""' \
+            --repo "${{ github.repository }}" 2>/dev/null || true)"
+        if [[ -n "${published_ref}" ]]; then
+            echo "Published baseline: ${published_ref}"
+        else
+            echo "Published baseline: none (never published)"
+        fi
+        echo "published_ref=${published_ref}" >> "$GITHUB_OUTPUT"
+    - name: Check published modules are immutable
+      if: steps.baseline.outputs.published_ref != ''
+      env:
+        PUBLISHED_REF: ${{ steps.baseline.outputs.published_ref }}
+      run: bash .github/workflows/registry_immutability.sh "${PUBLISHED_REF}"
     - name: Fetch pull request base SHA
       if: github.event_name == 'pull_request'
       env:
