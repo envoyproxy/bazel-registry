@@ -25,8 +25,12 @@ bazel_dep(name = "nghttp2", version = "1.66.0.envoy")
 
 Follows the standard Bazel registry layout: `bazel_registry.json` at the root and one directory per module under `modules/`, each containing `metadata.json` and one directory per version with `MODULE.bazel` and `source.json` plus optional `patches/` and `overlay/`.
 
-## Publishing and immutability
+## Publishing
 
-Published module versions are immutable. The published baseline is the latest GitHub release tag for this repository, and every `{module, version}` present at that tag is treated as published.
+The published baseline is the latest GitHub release tag for this repository, and every `{module, version}` present at that tag is treated as published.
 
 Between publishes, each module may carry at most one unpublished version. If multiple unpublished versions accumulate for the same module, the prune workflow removes the older unpublished versions and keeps only the most recently appended version from that module's `metadata.json`.
+
+## Immutability
+
+Published module versions (those present in the latest GitHub release) cannot be modified or removed. Fixes must be published as a new version. Yank a version by adding it to `yanked_versions`; never un-yank it by deleting the entry.
