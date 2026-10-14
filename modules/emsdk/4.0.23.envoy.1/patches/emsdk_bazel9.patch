@@ -1,0 +1,41 @@
+diff --git a/emscripten_toolchain/toolchain.bzl b/emscripten_toolchain/toolchain.bzl
+--- a/emscripten_toolchain/toolchain.bzl
++++ b/emscripten_toolchain/toolchain.bzl
+@@ -15,6 +15,8 @@
+     _flag_set = "flag_set",
+ )
+ load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
++load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
++load("@rules_cc//cc/toolchains:cc_toolchain_config_info.bzl", "CcToolchainConfigInfo")
+ 
+ def flag_set(flags = None, features = None, not_features = None, **kwargs):
+     """Extension to flag_set which allows for a "simple" form.
+diff --git a/remote_emscripten_repository.bzl b/remote_emscripten_repository.bzl
+--- a/remote_emscripten_repository.bzl
++++ b/remote_emscripten_repository.bzl
+@@ -1,6 +1,7 @@
+ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+ load(":emscripten_build_file.bzl", "EMSCRIPTEN_BUILD_FILE_CONTENT_TEMPLATE")
+ load(":revisions.bzl", "EMSCRIPTEN_TAGS")
++load("@rules_cc//cc:defs.bzl", "cc_toolchain", "cc_toolchain_suite")
+ load("//emscripten_toolchain:toolchain.bzl", "emscripten_cc_toolchain_config_rule")
+ 
+ def _python_exec_files_impl(ctx):
+@@ -136,7 +137,7 @@
+         script_extension = "bat" if is_windows_exec_platform else "sh",
+     )
+ 
+-    native.cc_toolchain(
++    cc_toolchain(
+         name = cc_wasm_name,
+         all_files = all_files_target,
+         ar_files = ar_files_target,
+@@ -158,7 +159,7 @@
+         toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+     )
+ 
+-    native.cc_toolchain_suite(
++    cc_toolchain_suite(
+         name = "everything-" + name,
+         toolchains = {
+             "wasm": cc_wasm_target,
