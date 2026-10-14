@@ -11,7 +11,8 @@
         "github:google/quiche"
     ],
     "versions": [
-        "0.0.0-261006-9e60ac2.envoy"
+        "0.0.0-261006-9e60ac2.envoy",
+        "0.0.0-261013-132bfd9.envoy"
     ],
     "yanked_versions": {}
 }
