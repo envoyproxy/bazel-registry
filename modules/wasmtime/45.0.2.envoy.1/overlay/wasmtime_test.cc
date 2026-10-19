@@ -12,8 +12,8 @@
 
 int main() {
   wasm_config_t *config = wasm_config_new();
+  wasmtime_config_strategy_set(config, WASMTIME_STRATEGY_CRANELIFT);
   wasmtime_config_wasm_gc_set(config, false);
-  wasm_engine_t *engine = wasm_engine_new_with_config(config);
-  wasm_engine_delete(engine);
+  wasm_config_delete(config);
   return 0;
 }

@@ -116,7 +116,7 @@ rust_static_library(
     srcs = glob(["crates/c-api/src/**/*.rs"]),
     crate_features = _C_API_FEATURES,
     crate_root = "crates/c-api/src/lib.rs",
-    edition = "2021",
+    edition = "2024",
     aliases = {
         "@cu//:wasmtime-internal-c-api-macros": "wasmtime_c_api_macros",
     },
