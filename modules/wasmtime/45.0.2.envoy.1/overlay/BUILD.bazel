@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("@rules_rust//rust:defs.bzl", "rust_static_library")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 licenses(["notice"])  # Apache 2
 
@@ -23,6 +23,14 @@ _C_API_FEATURES = [
     "cranelift",
     "gc",
     "gc-drc",
+]
+
+_C_API_DEPS = [
+    "@cu//:anyhow",
+    "@cu//:log",
+    "@cu//:once_cell",
+    "@cu//:tracing",
+    "@cu//:wasmtime",
 ]
 
 genrule(
@@ -111,9 +119,14 @@ cc_library(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     visibility = ["//visibility:public"],
+    # The rewritten rlib no longer embeds its Rust dependencies.
+    deps = _C_API_DEPS,
 )
 
-rust_static_library(
+# Use an rlib so rules_rust supplies std/compiler_builtins through the toolchain.
+# A staticlib embeds them, causing duplicate symbols when consumers (e.g. Envoy's
+# built-in Hickory DNS module) link another Rust staticlib into the same binary.
+rust_library(
     name = "rust_c_api",
     srcs = glob(["crates/c-api/src/**/*.rs"]),
     crate_features = _C_API_FEATURES,
@@ -125,12 +138,6 @@ rust_static_library(
     proc_macro_deps = [
         "@cu//:wasmtime-internal-c-api-macros",
     ],
-    deps = [
-        "@cu//:anyhow",
-        "@cu//:log",
-        "@cu//:once_cell",
-        "@cu//:tracing",
-        "@cu//:wasmtime",
-    ],
+    deps = _C_API_DEPS,
     visibility = ["//visibility:public"],
 )
