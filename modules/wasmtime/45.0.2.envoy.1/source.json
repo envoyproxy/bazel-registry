@@ -3,8 +3,8 @@
     "integrity": "sha256-qVz1cAi4fb4c2roiDqWLdbsLUzaeFm/iHnKQEb0l6eg=",
     "strip_prefix": "wasmtime-45.0.2",
     "overlay": {
-        "BUILD.bazel": "sha256-AP8WCXHcfTXAfX4WsDSFzj7o+mGMTyGLGwDPp5dGAEM=",
-        "cargo-bazel-lock.json": "sha256-1FjoFGa70BoAM2vRGEVohlYOVTOmyCNRGxR+9sHHnTo=",
-        "wasmtime_test.cc": "sha256-xPZnLyCr5qRjt0x0eg2xXKdKT6Lx3HlcsTGtiDrSpOQ="
+        "BUILD.bazel": "sha256-ccBrxye48PcEry7c/Vd9coOSRoQSMBVeBTUCLZ5HEfE=",
+        "cargo-bazel-lock.json": "sha256-68MttHwIIsxauTtbxLAb/bTy5krHK7E11gh1IHwjdG0=",
+        "wasmtime_test.cc": "sha256-trvJwg1L31FGnuYKNy6v04lo8zzib8JWgOEPJq6wRF8="
     }
 }

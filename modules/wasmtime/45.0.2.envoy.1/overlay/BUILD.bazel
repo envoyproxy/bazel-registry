@@ -18,10 +18,11 @@ load("@rules_rust//rust:defs.bzl", "rust_static_library")
 licenses(["notice"])  # Apache 2
 
 # Keep these C API features aligned with the wasmtime crate.spec in MODULE.bazel.
-# runtime/std are unconditional dependencies; gc does not enable gc-drc/gc-null.
+# runtime/std are unconditional dependencies; gc-drc provides the GC collector.
 _C_API_FEATURES = [
     "cranelift",
     "gc",
+    "gc-drc",
 ]
 
 genrule(
@@ -41,6 +42,7 @@ cc_library(
     name = "wasmtime_lib",
     hdrs = glob([
         "crates/c-api/include/**/*.h",
+        "crates/c-api/include/**/*.hh",
     ]) + [":wasmtime_conf_h"],
     includes = ["crates/c-api/include"],
     deps = [

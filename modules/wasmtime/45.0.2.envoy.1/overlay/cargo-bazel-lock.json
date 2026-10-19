@@ -1,5 +1,5 @@
 {
-  "checksum": "55a6fbedbb7cc0d77465484ce9ab874f92d730237af68c21e3f11b8cf74aa90b",
+  "checksum": "146ca0592c2a888c7a9f910e450473f34d7fc272cbf6c444553e845eb7eda27f",
   "crates": {
     "addr2line 0.26.0": {
       "name": "addr2line",
@@ -5277,6 +5277,7 @@
           "common": [
             "cranelift",
             "gc",
+            "gc-drc",
             "once_cell",
             "runtime",
             "std",
@@ -5506,6 +5507,7 @@
           "common": [
             "compile",
             "gc",
+            "gc-drc",
             "std"
           ],
           "selects": {}
@@ -5790,6 +5792,7 @@
         "crate_features": {
           "common": [
             "gc",
+            "gc-drc",
             "pulley"
           ],
           "selects": {}
