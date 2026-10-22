@@ -11,7 +11,8 @@
         "github:libbpf/libbpf"
     ],
     "versions": [
-        "1.7.0.envoy"
+        "1.7.0.envoy",
+        "1.7.0.envoy.1"
     ],
     "yanked_versions": {}
 }
