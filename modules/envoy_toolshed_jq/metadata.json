@@ -18,7 +18,8 @@
     ],
     "versions": [
         "0.5.3.envoy",
-        "0.5.4.envoy"
+        "0.5.4.envoy",
+        "0.5.5.envoy"
     ],
     "yanked_versions": {}
 }
