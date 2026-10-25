@@ -1,0 +1,88 @@
+diff -ruN original/include/proxy-wasm/v8.h edited/include/proxy-wasm/v8.h
+--- original/include/proxy-wasm/v8.h
++++ edited/include/proxy-wasm/v8.h
+@@ -21,6 +21,15 @@
+ 
+ namespace proxy_wasm {
+ 
+-std::unique_ptr<WasmVm> createV8Vm();
++struct V8Options {
++  // Use the Liftoff baseline compiler (with tier-up disabled) instead of forcing
++  // TurboFan up-front. Much faster compilation, slower generated code; intended
++  // for tests. V8 flags are process-global and are applied once when the engine
++  // is first created, so this takes effect only for the first VM created in the
++  // process (subsequent callers inherit the choice of whichever came first).
++  bool liftoff = false;
++};
++
++std::unique_ptr<WasmVm> createV8Vm(V8Options options = {});
+ 
+ } // namespace proxy_wasm
+diff -ruN original/src/v8/v8.cc edited/src/v8/v8.cc
+--- original/src/v8/v8.cc
++++ edited/src/v8/v8.cc
+@@ -40,14 +40,17 @@
+ namespace proxy_wasm {
+ namespace v8 {
+ 
+-wasm::Engine *engine() {
++wasm::Engine *engine(bool liftoff = false) {
+   static std::once_flag init;
+   static wasm::own<wasm::Engine> engine;
+ 
+-  std::call_once(init, []() {
+-    // Disable the Liftoff compiler to force optimized JIT up-front.
++  std::call_once(init, [liftoff]() {
+     std::string args = absl::StrFormat(
+-        "--no-liftoff --wasm_max_mem_pages=%u --stack-trace-limit=%u",
++        "%s --wasm_max_mem_pages=%u --stack-trace-limit=%u",
++        // Liftoff is the fast baseline compiler; TurboFan is the optimizing one. By default
++        // disable Liftoff to force optimized JIT up-front. With `liftoff` set, use Liftoff
++        // only and disable background tier-up so no TurboFan work happens at all.
++        liftoff ? "--liftoff --no-wasm-tier-up" : "--no-liftoff",
+         PROXY_WASM_HOST_MAX_WASM_MEMORY_SIZE_BYTES / PROXY_WASM_HOST_WASM_MEMORY_PAGE_SIZE_BYTES,
+         PROXY_WASM_HOST_MAX_BACKTRACE_FRAMES_COUNT);
+     ::v8::V8::SetFlagsFromString(args.c_str(), args.size());
+@@ -73,6 +76,7 @@
+ class V8 : public WasmVm {
+ public:
+   V8() = default;
++  explicit V8(V8Options options) : options_(options) {}
+ 
+   // WasmVm
+   std::string_view getEngineName() override { return "v8"; }
+@@ -137,6 +141,7 @@
+   // Initialize the V8 engine and store if necessary.
+   void initStore();
+ 
++  V8Options options_{};
+   wasm::own<wasm::Store> store_;
+   wasm::own<wasm::Module> module_;
+   wasm::own<wasm::Shared<wasm::Module>> shared_module_;
+@@ -278,7 +283,7 @@
+   if (store_ != nullptr) {
+     return;
+   }
+-  store_ = wasm::Store::make(engine());
++  store_ = wasm::Store::make(engine(options_.liftoff));
+ }
+ 
+ bool V8::load(std::string_view bytecode, std::string_view precompiled,
+@@ -337,7 +342,8 @@
+     return nullptr;
+   }
+ 
+-  clone->store_ = wasm::Store::make(engine());
++  clone->options_ = options_;
++  clone->store_ = wasm::Store::make(engine(options_.liftoff));
+   if (clone->store_ == nullptr) {
+     return nullptr;
+   }
+@@ -772,6 +778,6 @@
+ 
+ } // namespace v8
+ 
+-std::unique_ptr<WasmVm> createV8Vm() { return std::make_unique<v8::V8>(); }
++std::unique_ptr<WasmVm> createV8Vm(V8Options options) { return std::make_unique<v8::V8>(options); }
+ 
+ } // namespace proxy_wasm
