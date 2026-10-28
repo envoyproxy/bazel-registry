@@ -1,0 +1,5 @@
+{
+    "url": "https://github.com/envoyproxy/envoy/archive/678dfc8ffe8f14f60f75b2339c2471f378414ba6.tar.gz",
+    "integrity": "sha256-zV/hmgVSfuWMebmoAe+ldw2Aek0l0INNbJmLw62sQVA=",
+    "strip_prefix": "envoy-678dfc8ffe8f14f60f75b2339c2471f378414ba6/api"
+}
