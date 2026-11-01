@@ -237,6 +237,8 @@ x = "bazel_dep(name = 'unreal', version = '0')"
         self.assertEqual(sum(call.args[0] == self.archive
                              for call in self.read_url.call_args_list), 1)
         self.assertIn("title=registry/examples+: Add 1.2.3.envoy\n", output.read_text())
+        self.assertIn("branch=register/examples/examples-1.2.3.envoy+sibling-1.2.3.envoy\n",
+                      output.read_text())
         self.assertEqual(json.loads((self.modules / "sibling/1.2.3.envoy/source.json").read_bytes())
                          ["strip_prefix"], "examples-1.2.3/sibling")
         self.assertIn('version = "1.2.3.envoy"', (

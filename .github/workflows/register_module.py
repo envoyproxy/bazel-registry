@@ -488,7 +488,10 @@ def register(repository, ref, modules_root, dry_run=False, sha=""):
                 label = first + ("+" if rest else "")
                 output.write(f"modules={','.join(f'{n}@{v}' for n, v in entries)}\n")
                 output.write(f"title=registry/{label}: Add {first_version}\n")
-                output.write(f"branch=register/{repository.split('/')[1]}/{first}-{first_version}\n")
+                # Every registered module and version, so distinct registrations
+                # never share a branch (repeats of the same one do).
+                registering = "+".join(f"{n}-{v}" for n, v in entries)
+                output.write(f"branch=register/{repository.split('/')[1]}/{registering}\n")
             output.write(f"summary<<REGISTER_SUMMARY\n{summary}\nREGISTER_SUMMARY\n")
     return entries
 
