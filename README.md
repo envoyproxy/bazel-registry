@@ -68,12 +68,16 @@ Each root is registered independently, from its own version at the ref:
 
 So a monorepo can release its modules separately and dispatch every release:
 each run registers only what that release published. A run with nothing new
-succeeds without opening a PR.
+succeeds without opening a PR. A repeat while an earlier run's registration branch still exists
+is skipped too, leaving that branch and its PR as they are.
 
 Source templates contain `url`, `integrity` and `strip_prefix`, with `{OWNER}`,
 `{REPO}`, `{VERSION}` (the module's own version) and `{TAG}` placeholders; `TAG`
 is the ref with one leading `v` removed. `strip_prefix` is used as given, so it
-includes any subdirectory. Modules may share a release archive or use their own;
+includes any subdirectory, or is empty for an archive with files at its root.
+URLs may only use letters, digits and `. _ ~ % / + -` after the host, and
+`strip_prefix` letters, digits and `. _ + / -`, since registry CI uses both in
+shell. Modules may share a release archive or use their own;
 each archive is downloaded and hashed once, and the `MODULE.bazel` inside it
 must match the one at the ref.
 
@@ -84,7 +88,8 @@ those fixes must first be upstreamed to the source repo's templates.
 
 New releases always use `<version>.envoy`; `.envoy.N` is reserved for manual
 post-release registry-side fixes. The generator rewrites the module version and
-dependencies on modules released from the same ref (registered now or before),
+pins to the releases of modules from the same ref (registered now or before;
+pins to other versions are left as they are),
 removes top-level local/git/archive overrides and comment-only override blocks,
 and otherwise preserves `MODULE.bazel`. Nonliteral names/versions or
 unsupported constructs fail rather than guess. Non-dev dependencies are

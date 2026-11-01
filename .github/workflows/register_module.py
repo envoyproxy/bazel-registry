@@ -9,6 +9,7 @@ import io
 import json
 import os
 import pathlib
+import posixpath
 import re
 import sys
 import tarfile
@@ -184,16 +185,22 @@ def rewrite_module(text, version, siblings):
         elif name == "module" or name == "bazel_dep":
             if not {"name", "version"} <= attrs.keys():
                 raise ValueError(f"{name} must have literal name and version")
-            if name == "module" or attrs["name"][0] in siblings:
-                expected = version if name == "module" else siblings[attrs["name"][0]]
-                old, start, end = attrs["version"]
+            old, start, end = attrs["version"]
+            if name == "module":
+                expected = version
                 if old != expected:
-                    raise ValueError(f"{name} {attrs['name'][0]} version {old} != {expected}")
-                literal = text[start:end]
-                quote = literal[0]
-                if quote not in ("'", '"') or literal.startswith(quote * 3):
-                    raise ValueError("Rewritten versions must use simple quoted strings")
-                edits.append((start, end, quote + expected + ".envoy" + quote))
+                    raise ValueError(f"module {attrs['name'][0]} version {old} != {expected}")
+            elif siblings.get(attrs["name"][0]) == old:
+                # Only a pin to the sibling's own release: other versions keep
+                # their own registry or BCR entries.
+                expected = old
+            else:
+                continue
+            literal = text[start:end]
+            quote = literal[0]
+            if quote not in ("'", '"') or literal.startswith(quote * 3):
+                raise ValueError("Rewritten versions must use simple quoted strings")
+            edits.append((start, end, quote + expected + ".envoy" + quote))
     for start, end, replacement in sorted(edits, reverse=True):
         text = text[:start] + replacement + text[end:]
 
@@ -234,6 +241,12 @@ def render_source(template, repository, ref, version):
     url = urllib.parse.urlsplit(source["url"])
     if url.scheme != "https" or not url.netloc or url.username or url.password:
         raise ValueError("Source URL must be HTTPS without credentials")
+    # Both reach shell in registry CI: allow only plain URL and path characters.
+    if not re.fullmatch(r"https://[A-Za-z0-9.-]+(?::[0-9]+)?/[A-Za-z0-9._~%/+-]*", source["url"]):
+        raise ValueError("Source URL may only use letters, digits and . _ ~ % / + -")
+    if (not re.fullmatch(r"[A-Za-z0-9._+/-]*", source["strip_prefix"])
+            or ".." in source["strip_prefix"].split("/")):
+        raise ValueError("strip_prefix may only use letters, digits and . _ + / -")
     return {key: source[key] for key in ("url", "integrity", "strip_prefix")}
 
 
@@ -431,7 +444,8 @@ def register(repository, ref, modules_root, dry_run=False, sha=""):
         archive = archives[source["url"]]
         source["integrity"] = integrity(archive)
         # The registry's MODULE.bazel must be the one Bazel downloads.
-        if archive_member(archive, source["strip_prefix"] + "/MODULE.bazel") != text.encode():
+        packaged = posixpath.join(source["strip_prefix"], "MODULE.bazel")
+        if archive_member(archive, packaged) != text.encode():
             raise ValueError(f"{name}: MODULE.bazel in {source['url']} differs from {ref}")
         files = {"MODULE.bazel": rewrite_module(text, module_version, siblings).encode()}
         presubmit = upstream.raw(bcr + "/presubmit.yml", optional=True)

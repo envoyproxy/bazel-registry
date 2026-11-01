@@ -94,15 +94,33 @@ jobs:
             --ref="$REF" \
             --sha="$SHA" \
             "${args[@]}"
+    # A registration branch left from an earlier run (its PR still open, or
+    # unmerged) means this request is a repeat: leave it to that branch rather
+    # than fail pushing the same branch again.
+    - name: Check for an existing registration branch
+      id: existing
+      if: steps.register.outputs.registered == 'true'
+      env:
+        BRANCH: ${{ steps.register.outputs.branch }}
+      run: |
+        if git ls-remote --exit-code --heads origin "refs/heads/${BRANCH}" > /dev/null; then
+            echo "::notice::Registration branch ${BRANCH} already exists; skipping"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
     # Each module root registers only when its version at the ref is a new
     # release, so a ref can register some, all or none of them.
     - name: Stage generated entries
       if: >-
         steps.request.outputs.dry-run != 'true'
         && steps.register.outputs.registered == 'true'
+        && steps.existing.outputs.exists != 'true'
       run: git add -- modules
     - name: Create Pull Request
-      if: steps.register.outputs.registered == 'true'
+      if: >-
+        steps.register.outputs.registered == 'true'
+        && steps.existing.outputs.exists != 'true'
       uses: envoyproxy/toolshed/actions/github/pr@9bd3b300cf19f67cd2ef8b6e4aaa920f79894c24  # actions-v0.4.29
       with:
         base: main

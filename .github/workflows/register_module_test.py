@@ -7,6 +7,7 @@ import io
 import json
 import os
 import pathlib
+import posixpath
 import sys
 import tarfile
 import tempfile
@@ -56,7 +57,7 @@ class RegisterModuleTest(unittest.TestCase):
             with tarfile.open(fileobj=compressed, mode="w") as archive:
                 for url, data in sorted(self.data.items()):
                     if url.startswith(self.raw) and url.endswith("MODULE.bazel"):
-                        info = tarfile.TarInfo(prefix + "/" + url[len(self.raw):])
+                        info = tarfile.TarInfo(posixpath.join(prefix, url[len(self.raw):]))
                         info.size = len(data)
                         archive.addfile(info, io.BytesIO(data))
         return buffer.getvalue()
@@ -319,6 +320,37 @@ bazel_dep(name = "envoyish", version = "1.0.envoyish")
             with self.subTest(version=version), self.assertRaisesRegex(ValueError, "Invalid module version"):
                 self.run_register()
         self.assertFalse(self.modules.exists())
+
+    def test_only_sibling_release_pins_rewritten(self):
+        text = (
+            'module(name = "examples", version = "1.2.3")\n'
+            'bazel_dep(name = "sibling", version = "1.2.3")\n'
+            'bazel_dep(name = "sibling", version = "1.2.2.envoy.1", repo_name = "older")\n'
+            'bazel_dep(name = "sibling", version = "1.0.0", dev_dependency = True)\n')
+        self.assertEqual(
+            register.rewrite_module(text, VERSION, {"sibling": VERSION}),
+            text.replace('"1.2.3")', '"1.2.3.envoy")'))
+
+    def test_empty_strip_prefix_reads_archive_root(self):
+        self.data[self.raw + ".bcr/source.template.json"] = (
+            TEMPLATE.replace("{REPO}-{VERSION}", "").encode())
+        # Archive members at the root, not under a directory.
+        self.archives[self.archive] = ""
+        entries = self.run_register(dry_run=True)
+        self.assertIn(("examples", "1.2.3.envoy"), entries)
+        self.assertEqual(json.loads(entries["examples", "1.2.3.envoy"]["source.json"])
+                         ["strip_prefix"], "")
+
+    def test_shell_sensitive_source_values_rejected(self):
+        for url, strip in (
+                ("https://example.com/release.tar.gz?check=$(pwd)", "x"),
+                ("https://example.com/`id`.tar.gz", "x"),
+                ("https://example.com/a b.tar.gz", "x"),
+                ("https://example.com/release.tar.gz", "x\"$(id)"),
+                ("https://example.com/release.tar.gz", "x/../y")):
+            template = json.dumps({"url": url, "integrity": "", "strip_prefix": strip})
+            with self.subTest(url=url, strip=strip), self.assertRaises(ValueError):
+                register.render_source(template, REPOSITORY, "v1.2.3", VERSION)
 
     def test_presubmit_is_optional(self):
         del self.data[self.raw + ".bcr/presubmit.yml"]
