@@ -204,9 +204,20 @@ def rewrite_module(text, version, siblings):
     for start, end, replacement in sorted(edits, reverse=True):
         text = text[:start] + replacement + text[end:]
 
+    # String token spans: `#` lines inside (multiline) strings are not comments.
+    lines = text.splitlines(keepends=True)
+    offsets = [0]
+    for line in lines:
+        offsets.append(offsets[-1] + len(line))
+    strings = [(offsets[t.start[0] - 1] + t.start[1], offsets[t.end[0] - 1] + t.end[1])
+               for t in tokenize.generate_tokens(io.StringIO(text).readline)
+               if t.type == tokenize.STRING]
+
     # Remove comment-only groups only when they consist entirely of overrides.
     def strip_commented(match):
         block = match[0]
+        if any(start < match.end() and match.start() < end for start, end in strings):
+            return block
         uncommented = re.sub(r"(?m)^#[ ]?", "", block)
         try:
             found = calls(uncommented)
@@ -453,6 +464,14 @@ def register(repository, ref, modules_root, dry_run=False, sha=""):
             files["presubmit.yml"] = presubmit
         for kind in ("patches", "overlay"):
             extra = upstream.tree(bcr + "/" + kind)
+            # The registry's MODULE.bazel is generated and verified from the
+            # ref; patches or overlays changing it would bypass that.
+            if kind == "overlay" and "MODULE.bazel" in extra:
+                raise ValueError(f"{name}: overlay must not replace MODULE.bazel")
+            if kind == "patches" and any(
+                    re.search(rb"(?m)^(?:---|\+\+\+) (?:[^/\s]+/)?MODULE\.bazel\b", data)
+                    for data in extra.values()):
+                raise ValueError(f"{name}: patches must not change MODULE.bazel")
             if extra:
                 if kind == "patches":
                     source["patch_strip"] = 1

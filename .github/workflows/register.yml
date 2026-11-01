@@ -21,8 +21,12 @@ on:
         type: boolean
         default: false
 
+# One run at a time per upstream repo: refs can register the same modules (so
+# the same branch), and the existing-branch check is only safe serialized.
+# GitHub keeps one pending run per group, so a burst of dispatches can drop a
+# middle one; dispatching again is harmless.
 concurrency:
-  group: register-${{ github.event.client_payload.repository || inputs.repository }}-${{ github.event.client_payload.ref || inputs.ref }}
+  group: register-${{ github.event.client_payload.repository || inputs.repository }}
   cancel-in-progress: false
 
 jobs:

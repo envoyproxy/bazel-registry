@@ -70,7 +70,9 @@ So a monorepo can release its modules separately and dispatch every release:
 each run registers only what that release published. A run with nothing new
 succeeds without opening a PR. A repeat while an earlier run's registration branch still exists
 is skipped too, leaving that branch and its PR as they are. Branches are named after every module and version a run registers, so
-distinct registrations never share one.
+distinct registrations never share one. Runs for the same upstream repository are
+serialized. Templates may not patch or overlay `MODULE.bazel`: the registry's
+module file is generated and verified from the ref.
 
 Source templates contain `url`, `integrity` and `strip_prefix`, with `{OWNER}`,
 `{REPO}`, `{VERSION}` (the module's own version) and `{TAG}` placeholders; `TAG`

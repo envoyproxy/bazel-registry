@@ -354,6 +354,32 @@ bazel_dep(name = "envoyish", version = "1.0.envoyish")
             with self.subTest(url=url, strip=strip), self.assertRaises(ValueError):
                 register.render_source(template, REPOSITORY, "v1.2.3", VERSION)
 
+    def test_commented_overrides_inside_strings_preserved(self):
+        text = (
+            'module(name = "examples", version = "1.2.3")\n'
+            'ext = use_extension("@other//:defs.bzl", "extension")\n'
+            'ext.configure(script = """\n'
+            '# local_path_override(module_name = "x", path = ".")\n'
+            '""")\n'
+            '# local_path_override(module_name = "y", path = ".")\n')
+        self.assertEqual(
+            register.rewrite_module(text, VERSION, {}),
+            text.replace('"1.2.3"', '"1.2.3.envoy"')
+                .replace('# local_path_override(module_name = "y", path = ".")\n', ""))
+
+    def test_templates_must_not_change_module_file(self):
+        for path, listing, data in (
+                ("overlay", [{"name": "MODULE.bazel", "type": "file"}], b"module()\n"),
+                ("patches", [{"name": "fix.patch", "type": "file"}],
+                 b"--- a/MODULE.bazel\n+++ b/MODULE.bazel\n@@ -1 +1 @@\n")):
+            with self.subTest(path=path):
+                self.data = {k: v for k, v in self.data.items() if "/contents/" not in k}
+                self.data[self.api + ".bcr/" + path + "?ref=v1.2.3"] = json.dumps(listing).encode()
+                self.data[self.raw + ".bcr/" + path + "/" + listing[0]["name"]] = data
+                with self.assertRaisesRegex(ValueError, "MODULE.bazel"):
+                    self.run_register()
+        self.assertFalse(self.modules.exists())
+
     def test_presubmit_is_optional(self):
         del self.data[self.raw + ".bcr/presubmit.yml"]
         entries = self.run_register()
