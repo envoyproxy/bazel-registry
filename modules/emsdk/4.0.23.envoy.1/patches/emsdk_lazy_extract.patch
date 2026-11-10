@@ -11,7 +11,7 @@ index 4149ef6..c4a9520 100644
  python = use_extension("@rules_python//python/extensions:python.bzl", "python")
  python.toolchain(
 diff --git a/emscripten_build_file.bzl b/emscripten_build_file.bzl
-index eefbe79..0c473c9 100644
+index eefbe79..2208a3e 100644
 --- a/emscripten_build_file.bzl
 +++ b/emscripten_build_file.bzl
 @@ -1,101 +1,114 @@
@@ -24,7 +24,7 @@ index eefbe79..0c473c9 100644
 +EMSCRIPTEN_BIN_TOOLS = [
 +    "clang",
 +    "clang++",
-+    "clang-*",
++    "clang-[0-9]*",
 +    "lld",
 +    "llvm-ar",
 +    "llvm-dwarfdump",
@@ -285,15 +285,17 @@ index 0000000..bff1342
 +    toolchains = [TAR_TOOLCHAIN_TYPE],
 +)
 diff --git a/emscripten_toolchain/toolchain.bzl b/emscripten_toolchain/toolchain.bzl
-index 4ad2c6d..4b2883b 100644
+index 4ad2c6d..deeef62 100644
 --- a/emscripten_toolchain/toolchain.bzl
 +++ b/emscripten_toolchain/toolchain.bzl
-@@ -72,7 +72,13 @@ def _impl(ctx):
+@@ -72,7 +72,15 @@ def _impl(ctx):
  
      cc_target_os = "emscripten"
  
 +    # The binaries are tree artifacts extracted in a build action (bin/,
-+    # emscripten/, lib/), so the install root is their parent directory.
++    # emscripten/, lib/), so the install root is their parent directory. The
++    # attribute is not exec-transitioned: cc_toolchain's compiler_files etc.
++    # are in the target configuration and the path must match those inputs.
      emscripten_dir = ctx.attr.emscripten_binaries.label.workspace_root
 +    for f in ctx.files.emscripten_binaries:
 +        if f.is_directory:
@@ -302,6 +304,15 @@ index 4ad2c6d..4b2883b 100644
  
      nodejs_path = ctx.file.nodejs_bin.path
  
+@@ -1152,7 +1160,7 @@ emscripten_cc_toolchain_config_rule = rule(
+     attrs = {
+         "cpu": attr.string(mandatory = True, values = ["asmjs", "wasm"]),
+         "em_config": attr.label(mandatory = True, allow_single_file = True),
+-        "emscripten_binaries": attr.label(mandatory = True, cfg = "exec"),
++        "emscripten_binaries": attr.label(mandatory = True),
+         "nodejs_bin": attr.label(mandatory = True, allow_single_file = True),
+         "python_bin": attr.label(mandatory = True, cfg = "exec"),
+         "script_extension": attr.string(mandatory = True, values = ["sh", "bat"]),
 diff --git a/remote_emscripten_repository.bzl b/remote_emscripten_repository.bzl
 index 6161550..9e032b5 100644
 --- a/remote_emscripten_repository.bzl

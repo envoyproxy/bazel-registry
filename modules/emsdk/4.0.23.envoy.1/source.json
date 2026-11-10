@@ -5,7 +5,7 @@
     "patches": {
         "emsdk_bzlmod.patch": "sha256-k7HlAp1H6b86D+rvrz8irZv1LUNVREMer4ptH7DWNG0=",
         "emsdk_bazel9.patch": "sha256-n+WYX+S+PAp1pyO5hzPWdDErv52weer0DeFXwq5NNAI=",
-        "emsdk_lazy_extract.patch": "sha256-aoJg5xV8GZRyLZhudVnc5dPgxNego74RgN8bJ1AqYiI="
+        "emsdk_lazy_extract.patch": "sha256-cyruLVf9UUGybUuDpsfBrkIT/7BfrI7BQuUfosRn268="
     },
     "patch_strip": 1
 }
