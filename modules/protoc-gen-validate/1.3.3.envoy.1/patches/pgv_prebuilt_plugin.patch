@@ -1,11 +1,11 @@
 diff --git a/BUILD.bazel b/BUILD.bazel
-index 6112a46..dd069b5 100644
+index 6112a46..d6732b1 100644
 --- a/BUILD.bazel
 +++ b/BUILD.bazel
 @@ -1,29 +1,22 @@
 -load("@bazel_gazelle//:def.bzl", "gazelle")
 -load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-+load("//bazel:prebuilt.bzl", "PREBUILT_PLATFORMS", "prebuilt_repo_name")
++load("//bazel:prebuilt.bzl", "PREBUILT_PLATFORMS", "prebuilt_binary", "prebuilt_repo_name")
  
 -# gazelle:prefix github.com/envoyproxy/protoc-gen-validate
 -# gazelle:exclude tests
@@ -26,11 +26,11 @@ index 6112a46..dd069b5 100644
 +]
  
 -go_binary(
-+alias(
++prebuilt_binary(
      name = "protoc-gen-validate",
 -    embed = [":protoc-gen-validate_lib"],
 -    importpath = "github.com/envoyproxy/protoc-gen-validate",
-+    actual = select({
++    binary = select({
 +        ":prebuilt_" + platform: "@{}//:{}".format(prebuilt_repo_name(platform), info.binary)
 +        for platform, info in PREBUILT_PLATFORMS.items()
 +    }),
@@ -51,10 +51,10 @@ index 6112a46..dd069b5 100644
 -)
 diff --git a/bazel/prebuilt.bzl b/bazel/prebuilt.bzl
 new file mode 100644
-index 0000000..0247365
+index 0000000..c9e907e
 --- /dev/null
 +++ b/bazel/prebuilt.bzl
-@@ -0,0 +1,78 @@
+@@ -0,0 +1,102 @@
 +"""Prebuilt protoc-gen-validate binaries from the upstream GitHub release.
 +
 +Building the plugin from source drags the Go toolchain, gazelle (compiled on
@@ -132,4 +132,28 @@ index 0000000..0247365
 +prebuilt = module_extension(
 +    implementation = _prebuilt_impl,
 +    doc = "Repositories holding the prebuilt protoc-gen-validate binaries, one per platform.",
++)
++
++def _prebuilt_binary_impl(ctx):
++    binary = ctx.file.binary
++    extension = "." + binary.extension if binary.extension else ""
++    out = ctx.actions.declare_file(ctx.label.name + extension)
++    ctx.actions.symlink(output = out, target_file = binary, is_executable = True)
++    return [DefaultInfo(
++        executable = out,
++        files = depset([out]),
++        runfiles = ctx.runfiles(files = [out]),
++    )]
++
++prebuilt_binary = rule(
++    implementation = _prebuilt_binary_impl,
++    attrs = {
++        "binary": attr.label(
++            allow_single_file = True,
++            mandatory = True,
++            doc = "The prebuilt binary for the platform this target is built for (a select).",
++        ),
++    },
++    executable = True,
++    doc = "An executable target wrapping a prebuilt binary, usable wherever a go_binary was.",
 +)

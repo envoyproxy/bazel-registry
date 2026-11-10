@@ -6,7 +6,7 @@
         "bazel_9_fixes.patch": "sha256-dSY9Vm27yD5rYu4NGHFxOe1J1pjqa/SI1H3DrOdMkSc=",
         "pgv.patch": "sha256-0fgeyvyuLvLG5tEy2EoOPmnAJuajs5wCvzTjGxTw6pU=",
         "self_labels.patch": "sha256-yYEau4hEZQ81haL/5ry0V333Poztu7zuZ57mAaxzqxA=",
-        "pgv_prebuilt_plugin.patch": "sha256-SJmCw4+H492SsslqiPYd4UNisT4VurOI+hF8jI4uVpE="
+        "pgv_prebuilt_plugin.patch": "sha256-PQ7oByeUE2OVK0ci3V6kKEHRna8Uw7T4/ZLoXVaI654="
     },
     "patch_strip": 1
 }
