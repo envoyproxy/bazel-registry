@@ -1,16 +1,31 @@
+diff --git a/MODULE.bazel b/MODULE.bazel
+index 4149ef6..c4a9520 100644
+--- a/MODULE.bazel
++++ b/MODULE.bazel
+@@ -9,6 +9,7 @@ bazel_dep(name = "aspect_rules_js", version = "1.42.0")
+ bazel_dep(name = "rules_nodejs", version = "6.3.2")
+ bazel_dep(name = "rules_cc", version = "0.1.1")
+ bazel_dep(name = "rules_python", version = "1.3.0")
++bazel_dep(name = "tar.bzl", version = "0.5.1")
+ 
+ python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+ python.toolchain(
 diff --git a/emscripten_build_file.bzl b/emscripten_build_file.bzl
-index eefbe79..262f8f7 100644
+index eefbe79..0c473c9 100644
 --- a/emscripten_build_file.bzl
 +++ b/emscripten_build_file.bzl
-@@ -1,101 +1,111 @@
+@@ -1,101 +1,114 @@
  """A templated build file for emscripten repositories"""
  
 +# The tools the toolchain uses, i.e. the files the filegroups below used to
-+# list individually from an extracted http_archive. Everything else under bin/
-+# is dropped from the extracted tree.
++# list individually from an extracted http_archive, plus the targets of the
++# symlinks among them (clang -> clang-NN, wasm-ld -> lld). Everything else
++# under bin/ is left out of the extracted tree.
 +EMSCRIPTEN_BIN_TOOLS = [
 +    "clang",
 +    "clang++",
++    "clang-*",
++    "lld",
 +    "llvm-ar",
 +    "llvm-dwarfdump",
 +    "llvm-dwp",
@@ -180,10 +195,10 @@ index eefbe79..262f8f7 100644
 +    )
 diff --git a/emscripten_extract.bzl b/emscripten_extract.bzl
 new file mode 100644
-index 0000000..1d018d7
+index 0000000..bff1342
 --- /dev/null
 +++ b/emscripten_extract.bzl
-@@ -0,0 +1,120 @@
+@@ -0,0 +1,85 @@
 +"""Extract a downloaded Emscripten release archive in a build action.
 +
 +The release archives are large (~340MB compressed, ~1.5GB extracted) and
@@ -192,91 +207,55 @@ index 0000000..1d018d7
 +instead makes the result a cacheable tree artifact: with remote execution the
 +archive is uploaded once and the extracted tree only ever lives on the workers.
 +
-+The extracted tree is pruned to what the toolchain actually uses (the same set
-+as the filegroups the http_archive build file used to declare), and symlinks
-+are replaced with copies so the trees are plain files.
++Extraction uses the hermetic bsdtar from the tar.bzl toolchain (handles tar.xz
++and zip), so nothing is required of the execution platform. The extracted tree
++is pruned to what the toolchain actually uses, the same set as the filegroups
++the http_archive build file used to declare; symlinks (clang -> clang-NN,
++wasm-ld -> lld, node_modules/.bin/*) are kept, with their targets, as relative
++links inside the trees.
 +"""
 +
-+_SCRIPT = """
-+set -euo pipefail
++TAR_TOOLCHAIN_TYPE = "@tar.bzl//tar/toolchain:type"
 +
-+archive="$1"
-+prefix="$2"
-+bin_out="$3"
-+emscripten_out="$4"
-+lib_out="$5"
-+shift 5
++# Paths under the archive prefix that are never needed.
++EXCLUDE = [
++    "emscripten/test",
++    "emscripten/docs",
++    "emscripten/media",
++]
 +
-+out_root="$(dirname "$bin_out")"
-+member() {
-+    printf '%s%s' "${prefix:+$prefix/}" "$1"
-+}
-+
-+if [[ "$archive" == *.zip ]]; then
-+    tmp="$(mktemp -d)"
-+    trap 'rm -rf "$tmp"' EXIT
-+    unzip -q "$archive" "$(member bin)/*" "$(member emscripten)/*" "$(member lib)/*" -d "$tmp"
-+    src="$tmp${prefix:+/$prefix}"
-+    cp -R "$src/bin/." "$bin_out/"
-+    cp -R "$src/emscripten/." "$emscripten_out/"
-+    cp -R "$src/lib/." "$lib_out/"
-+else
-+    strip=0
-+    if [[ -n "$prefix" ]]; then
-+        strip=$(printf '%s' "$prefix" | tr -cd '/' | wc -c)
-+        strip=$((strip + 1))
-+    fi
-+    tar -xf "$archive" -C "$out_root" --strip-components="$strip" \\
-+        "$(member bin)" "$(member emscripten)" "$(member lib)"
-+fi
-+
-+# Replace symlinks with copies of their targets (drop dangling ones).
-+find "$bin_out" "$emscripten_out" "$lib_out" -type l | while IFS= read -r link; do
-+    if target="$(readlink -f "$link")" && [[ -e "$target" ]]; then
-+        rm "$link"
-+        cp -R "$target" "$link"
-+    else
-+        rm "$link"
-+    fi
-+done
-+
-+# Keep only the tools the toolchain uses.
-+for tool in "$bin_out"/*; do
-+    name="${tool##*/}"
-+    keep=0
-+    for wanted in "$@"; do
-+        if [[ "$wanted" == "$name" ]]; then
-+            keep=1
-+            break
-+        fi
-+    done
-+    if [[ "$keep" == 0 ]]; then
-+        rm -rf "$tool"
-+    fi
-+done
-+
-+rm -rf "${emscripten_out:?}/test" "${emscripten_out:?}/docs" "${emscripten_out:?}/media"
-+find "$emscripten_out" -type d -name __pycache__ -prune -exec rm -rf {} +
-+"""
++# Path components excluded wherever they occur.
++EXCLUDE_ANYWHERE = ["__pycache__"]
 +
 +def _emscripten_extract_impl(ctx):
 +    bin_dir = ctx.actions.declare_directory("bin")
 +    emscripten_dir = ctx.actions.declare_directory("emscripten")
 +    lib_dir = ctx.actions.declare_directory("lib")
 +    outputs = [bin_dir, emscripten_dir, lib_dir]
-+    ctx.actions.run_shell(
-+        inputs = [ctx.file.archive],
++    bsdtar = ctx.toolchains[TAR_TOOLCHAIN_TYPE]
++    prefix = ctx.attr.strip_prefix.strip("/")
++    components = len(prefix.split("/")) if prefix else 0
++    members = [
++        "{}/{}".format(prefix, path) if prefix else path
++        for path in ["bin/" + tool for tool in ctx.attr.bin_tools] + ["emscripten", "lib"]
++    ]
++    excludes = ["{}/{}".format(prefix, path) if prefix else path for path in EXCLUDE] + EXCLUDE_ANYWHERE
++
++    args = ctx.actions.args()
++    args.add("--extract")
++    args.add("--file", ctx.file.archive)
++    args.add("-C", bin_dir.dirname)
++    args.add("--strip-components", str(components))
++    args.add_all(excludes, before_each = "--exclude")
++    args.add_all(members)
++    ctx.actions.run(
++        executable = bsdtar.tarinfo.binary,
++        inputs = depset([ctx.file.archive], transitive = [bsdtar.default.files]),
 +        outputs = outputs,
-+        command = _SCRIPT,
-+        arguments = [
-+            ctx.file.archive.path,
-+            ctx.attr.strip_prefix,
-+            bin_dir.path,
-+            emscripten_dir.path,
-+            lib_dir.path,
-+        ] + ctx.attr.bin_tools,
++        arguments = [args],
 +        mnemonic = "EmscriptenExtract",
 +        progress_message = "Extracting %s" % ctx.file.archive.short_path,
++        toolchain = TAR_TOOLCHAIN_TYPE,
 +    )
 +    return [
 +        DefaultInfo(files = depset(outputs)),
@@ -297,12 +276,13 @@ index 0000000..1d018d7
 +        ),
 +        "bin_tools": attr.string_list(
 +            mandatory = True,
-+            doc = "Names of the files under bin/ to keep.",
++            doc = "Members of bin/ to extract (bsdtar patterns).",
 +        ),
 +        "strip_prefix": attr.string(
 +            doc = "Directory prefix to strip from the archive members.",
 +        ),
 +    },
++    toolchains = [TAR_TOOLCHAIN_TYPE],
 +)
 diff --git a/emscripten_toolchain/toolchain.bzl b/emscripten_toolchain/toolchain.bzl
 index 4ad2c6d..4b2883b 100644
