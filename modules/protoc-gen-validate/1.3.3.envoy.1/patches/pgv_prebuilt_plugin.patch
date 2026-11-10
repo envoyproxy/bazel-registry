@@ -1,0 +1,202 @@
+diff --git a/BUILD.bazel b/BUILD.bazel
+index 6112a46..dd069b5 100644
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -1,29 +1,22 @@
+-load("@bazel_gazelle//:def.bzl", "gazelle")
+-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
++load("//bazel:prebuilt.bzl", "PREBUILT_PLATFORMS", "prebuilt_repo_name")
+ 
+-# gazelle:prefix github.com/envoyproxy/protoc-gen-validate
+-# gazelle:exclude tests
+-# gazelle:exclude example-workspace
+-# gazelle:exclude validate/validate.h
+-# gazelle:go_naming_convention import_alias
+-gazelle(name = "gazelle")
++# The protoc plugin is the prebuilt binary from the upstream release for the
++# platform it runs on, rather than a go_binary: building it from source pulls
++# the Go toolchain, gazelle and the plugin's Go dependencies into every build
++# that generates validators. See bazel/prebuilt.bzl.
++[
++    config_setting(
++        name = "prebuilt_" + platform,
++        constraint_values = info.constraints,
++    )
++    for platform, info in PREBUILT_PLATFORMS.items()
++]
+ 
+-go_binary(
++alias(
+     name = "protoc-gen-validate",
+-    embed = [":protoc-gen-validate_lib"],
+-    importpath = "github.com/envoyproxy/protoc-gen-validate",
++    actual = select({
++        ":prebuilt_" + platform: "@{}//:{}".format(prebuilt_repo_name(platform), info.binary)
++        for platform, info in PREBUILT_PLATFORMS.items()
++    }),
+     visibility = ["//visibility:public"],
+ )
+-
+-go_library(
+-    name = "protoc-gen-validate_lib",
+-    srcs = ["main.go"],
+-    importpath = "github.com/envoyproxy/protoc-gen-validate",
+-    visibility = ["//visibility:private"],
+-    deps = [
+-        "//module",
+-        "@com_github_lyft_protoc_gen_star_v2//:protoc-gen-star",
+-        "@com_github_lyft_protoc_gen_star_v2//lang/go",
+-        "@org_golang_google_protobuf//types/pluginpb",
+-    ],
+-)
+diff --git a/bazel/pgv_proto_library.bzl.orig b/bazel/pgv_proto_library.bzl.orig
+deleted file mode 100644
+index b8fb865..0000000
+--- a/bazel/pgv_proto_library.bzl.orig
++++ /dev/null
+@@ -1,61 +0,0 @@
+-load("@com_google_protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+-load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
+-load("@rules_cc//cc:defs.bzl", "cc_library")
+-load(":protobuf.bzl", "cc_proto_gen_validate", "java_proto_gen_validate")
+-
+-_DEFAULT_GO_PROTOC = ["@io_bazel_rules_go//proto:go_proto"]
+-
+-def pgv_go_proto_library(name, compilers = _DEFAULT_GO_PROTOC, proto = None, deps = [], **kwargs):
+-    go_proto_library(
+-        name = name,
+-        proto = proto,
+-        deps = ["@com_envoyproxy_protoc_gen_validate//validate:validate"] + deps,
+-        compilers = compilers + [
+-            "@com_envoyproxy_protoc_gen_validate//bazel/go:pgv_plugin_go",
+-        ],
+-        visibility = ["//visibility:public"],
+-        **kwargs
+-    )
+-
+-def pgv_cc_proto_library(
+-        name,
+-        deps = [],
+-        cc_deps = [],
+-        copts = [],
+-        **kargs):
+-    """Bazel rule to create a C++ protobuf validation library from proto source files
+-    Args:
+-      name: the name of the pgv_cc_proto_library.
+-      deps: proto_library rules that contains the necessary .proto files.
+-      cc_deps: C++ dependencies of the protos being compiled. Likely cc_proto_library or pgv_cc_proto_library
+-      **kargs: other keyword arguments that are passed to cc_library.
+-    """
+-
+-    cc_proto_library(
+-        name = name + "_cc_proto",
+-        deps = deps,
+-    )
+-    cc_proto_gen_validate(
+-        name = name + "_validate",
+-        deps = deps,
+-    )
+-    cc_library(
+-        name = name,
+-        hdrs = [":" + name + "_validate"],
+-        srcs = [":" + name + "_validate"],
+-        deps = cc_deps + [
+-            ":" + name + "_cc_proto",
+-            "@com_envoyproxy_protoc_gen_validate//validate:cc_validate",
+-            "@com_envoyproxy_protoc_gen_validate//validate:validate_cc",
+-            "@com_google_protobuf//:protobuf",
+-            "@com_googlesource_code_re2//:re2",
+-        ],
+-        copts = copts + select({
+-            "@com_envoyproxy_protoc_gen_validate//bazel:windows_x86_64": ["-DWIN32"],
+-            "//conditions:default": [],
+-        }),
+-        alwayslink = 1,
+-        **kargs
+-    )
+-
+-pgv_java_proto_library = java_proto_gen_validate
+diff --git a/bazel/prebuilt.bzl b/bazel/prebuilt.bzl
+new file mode 100644
+index 0000000..0247365
+--- /dev/null
++++ b/bazel/prebuilt.bzl
+@@ -0,0 +1,78 @@
++"""Prebuilt protoc-gen-validate binaries from the upstream GitHub release.
++
++Building the plugin from source drags the Go toolchain, gazelle (compiled on
++the fly by `go_repository_tools`) and the plugin's Go dependencies into every
++build that generates validators, which is most of them. The release ships
++static binaries for every platform Bazel runs on, so the plugin is downloaded
++instead; the Go rules are only loaded by the packages that really need them.
++"""
++
++PREBUILT_VERSION = "1.3.3"
++
++_URL = "https://github.com/bufbuild/protoc-gen-validate/releases/download/v{version}/protoc-gen-validate_{version}_{platform}.tar.gz"
++
++# sha256 of the release archives, from protoc-gen-validate_<version>_checksums.txt.
++PREBUILT_PLATFORMS = {
++    "darwin_amd64": struct(
++        sha256 = "10090dc4e2a58d9c4392482677add96a4f4273df76a536da27aec2ea5417df89",
++        binary = "protoc-gen-validate",
++        constraints = ["@platforms//os:macos", "@platforms//cpu:x86_64"],
++    ),
++    "darwin_arm64": struct(
++        sha256 = "0ae7bb4cdc6eb357e721db8f8f9b07b10a87fcb234899704d4eab33ee2b793ee",
++        binary = "protoc-gen-validate",
++        constraints = ["@platforms//os:macos", "@platforms//cpu:aarch64"],
++    ),
++    "linux_amd64": struct(
++        sha256 = "6f851d3636b0c12a9fb5f99bf5c57651319f6a4c1d695f304269f1204dc9e13c",
++        binary = "protoc-gen-validate",
++        constraints = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
++    ),
++    "linux_arm64": struct(
++        sha256 = "e34b7526405741d7fafbf6f1c68cdda429b9420190b180a0b023016651215190",
++        binary = "protoc-gen-validate",
++        constraints = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
++    ),
++    "windows_amd64": struct(
++        sha256 = "f4695fc6c243357dc0ef90fea630c15ef04aa2d4ce4343873056183095658f88",
++        binary = "protoc-gen-validate.exe",
++        constraints = ["@platforms//os:windows", "@platforms//cpu:x86_64"],
++    ),
++}
++
++def prebuilt_repo_name(platform):
++    return "protoc_gen_validate_prebuilt_" + platform
++
++def _prebuilt_repository_impl(ctx):
++    ctx.download_and_extract(
++        url = _URL.format(version = ctx.attr.version, platform = ctx.attr.platform),
++        sha256 = ctx.attr.sha256,
++    )
++    ctx.file("WORKSPACE", 'workspace(name = "{}")\n'.format(ctx.name))
++    ctx.file("BUILD.bazel", 'exports_files(["{}"])\n'.format(ctx.attr.binary))
++
++_prebuilt_repository = repository_rule(
++    implementation = _prebuilt_repository_impl,
++    attrs = {
++        "binary": attr.string(mandatory = True),
++        "platform": attr.string(mandatory = True),
++        "sha256": attr.string(mandatory = True),
++        "version": attr.string(mandatory = True),
++    },
++    doc = "Downloads the protoc-gen-validate release archive for one platform.",
++)
++
++def _prebuilt_impl(_module_ctx):
++    for platform, info in PREBUILT_PLATFORMS.items():
++        _prebuilt_repository(
++            name = prebuilt_repo_name(platform),
++            binary = info.binary,
++            platform = platform,
++            sha256 = info.sha256,
++            version = PREBUILT_VERSION,
++        )
++
++prebuilt = module_extension(
++    implementation = _prebuilt_impl,
++    doc = "Repositories holding the prebuilt protoc-gen-validate binaries, one per platform.",
++)
