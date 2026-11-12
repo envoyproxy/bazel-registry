@@ -1,0 +1,272 @@
+diff --git a/extensions.bzl b/extensions.bzl
+new file mode 100644
+index 0000000..8d8228e
+--- /dev/null
++++ b/extensions.bzl
+@@ -0,0 +1,11 @@
++load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
++
++def _non_module_deps_impl(_ctx):
++  http_archive(
++    name = "com_google_googleapis",
++    url = "https://github.com/googleapis/googleapis/archive/1d5522ad1056f16a6d593b8f3038d831e64daeea.tar.gz",
++    sha256 = "cd13e547cffaad217c942084fd5ae0985a293d0cce3e788c20796e5e2ea54758",
++    strip_prefix = "googleapis-1d5522ad1056f16a6d593b8f3038d831e64daeea",
++  )
++
++non_module_deps = module_extension(implementation = _non_module_deps_impl)
+diff --git a/googleapis_ext.bzl b/googleapis_ext.bzl
+new file mode 100644
+index 0000000..f3c1e15
+--- /dev/null
++++ b/googleapis_ext.bzl
+@@ -0,0 +1,6 @@
++load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
++
++googleapis_ext = module_extension(implementation = lambda x: switched_rules_by_language(
++    name = "com_google_googleapis_imports",
++    cc = True,
++))
+diff --git a/src/include/grpc_transcoding/path_matcher.h b/src/include/grpc_transcoding/path_matcher.h
+index 1c0f6fe..605bf2c 100644
+--- a/src/include/grpc_transcoding/path_matcher.h
++++ b/src/include/grpc_transcoding/path_matcher.h
+@@ -22,6 +22,7 @@
+ #include <unordered_map>
+ #include <unordered_set>
+ 
++#include "absl/strings/str_cat.h"
+ #include "absl/strings/str_split.h"
+ #include "http_template.h"
+ #include "path_matcher_node.h"
+@@ -187,18 +188,10 @@ void ExtractBindingsFromPath(const std::vector<HttpTemplate::Variable>& vars,
+     size_t end_segment = (var.end_segment >= 0)
+                              ? var.end_segment
+                              : parts.size() + var.end_segment + 1;
+-    // It is multi-part match if we have more than one segment. We also make
+-    // sure that a single URL segment match with ** is also considered a
+-    // multi-part match by checking if it->second.end_segment is negative.
+-    bool is_multipart =
+-        (end_segment - var.start_segment) > 1 || var.end_segment < 0;
+-    const UrlUnescapeSpec var_unescape_spec =
+-        is_multipart ? unescape_spec : UrlUnescapeSpec::kAllCharacters;
+-
+     // Joins parts with "/"  to form a path string.
+     for (size_t i = var.start_segment; i < end_segment; ++i) {
+       // For multipart matches only unescape non-reserved characters.
+-      binding.value += UrlUnescapeString(parts[i], var_unescape_spec, false);
++      binding.value += UrlUnescapeString(parts[i], unescape_spec, false);
+       if (i < end_segment - 1) {
+         binding.value += "/";
+       }
+@@ -271,13 +264,9 @@ std::vector<std::string> ExtractRequestParts(
+   }
+ 
+   std::vector<std::string> result;
+-  if (path.size() > 0) {
++  if (path.size() > 1) {
+     result = absl::StrSplit(path.substr(1), '/');
+   }
+-  // Removes all trailing empty parts caused by extra "/".
+-  while (!result.empty() && (*(--result.end())).empty()) {
+-    result.pop_back();
+-  }
+   return result;
+ }
+ 
+@@ -326,6 +315,9 @@ Method PathMatcher<Method>::Lookup(
+     const std::string& query_params,
+     std::vector<VariableBinding>* variable_bindings,
+     std::string* body_field_path) const {
++  if (http_method.find(':') != std::string::npos) {
++    return nullptr;
++  }
+   std::string verb;
+   const std::vector<std::string> parts = ExtractRequestParts(
+       path, custom_verbs_, verb, match_unregistered_custom_verb_);
+@@ -336,8 +328,10 @@ Method PathMatcher<Method>::Lookup(
+     return nullptr;
+   }
+ 
++  const std::string method_key =
++      verb.empty() ? http_method : absl::StrCat(http_method, ":", verb);
+   PathMatcherLookupResult lookup_result =
+-      LookupInPathMatcherNode(*root_ptr_, parts, http_method + verb);
++      LookupInPathMatcherNode(*root_ptr_, parts, method_key);
+   // Return nullptr if nothing is found or the result is marked for duplication.
+   if (lookup_result.data == nullptr || lookup_result.is_multiple) {
+     return nullptr;
+@@ -361,6 +355,9 @@ Method PathMatcher<Method>::Lookup(
+ template <class Method>
+ Method PathMatcher<Method>::Lookup(const std::string& http_method,
+                                    const std::string& path) const {
++  if (http_method.find(':') != std::string::npos) {
++    return nullptr;
++  }
+   std::string verb;
+   const std::vector<std::string> parts = ExtractRequestParts(
+       path, custom_verbs_, verb, match_unregistered_custom_verb_);
+@@ -371,8 +368,10 @@ Method PathMatcher<Method>::Lookup(const std::string& http_method,
+     return nullptr;
+   }
+ 
++  const std::string method_key =
++      verb.empty() ? http_method : absl::StrCat(http_method, ":", verb);
+   PathMatcherLookupResult lookup_result =
+-      LookupInPathMatcherNode(*root_ptr_, parts, http_method + verb);
++      LookupInPathMatcherNode(*root_ptr_, parts, method_key);
+   // Return nullptr if nothing is found or the result is marked for duplication.
+   if (lookup_result.data == nullptr || lookup_result.is_multiple) {
+     return nullptr;
+@@ -425,7 +424,10 @@ bool PathMatcherBuilder<Method>::Register(
+   method_data->body_field_path = body_field_path;
+   method_data->system_query_parameter_names = system_query_parameter_names;
+ 
+-  if (!InsertPathToNode(path_info, method_data.get(), http_method + ht->verb(),
++  const std::string method_key =
++      ht->verb().empty() ? http_method
++                         : absl::StrCat(http_method, ":", ht->verb());
++  if (!InsertPathToNode(path_info, method_data.get(), method_key,
+                         root_ptr_.get())) {
+     return false;
+   }
+diff --git a/src/message_reader.cc b/src/message_reader.cc
+index 9284551..c8e1d9e 100644
+--- a/src/message_reader.cc
++++ b/src/message_reader.cc
+@@ -86,7 +86,7 @@ std::unique_ptr<pbio::ZeroCopyInputStream> MessageReader::NextMessage() {
+   // Check if we have the current message size. If not try to read it.
+   if (!have_current_message_size_) {
+     if (in_->BytesAvailable() <
+-        static_cast<pb::int64>(kGrpcDelimiterByteSize)) {
++        static_cast<int64_t>(kGrpcDelimiterByteSize)) {
+       // We don't have 5 bytes available to read the length of the message.
+       // Find out whether the stream is finished and return false.
+       finished_ = in_->Finished();
+@@ -115,7 +115,7 @@ std::unique_ptr<pbio::ZeroCopyInputStream> MessageReader::NextMessage() {
+     have_current_message_size_ = true;
+   }
+ 
+-  if (in_->BytesAvailable() < static_cast<pb::int64>(current_message_size_)) {
++  if (in_->BytesAvailable() < static_cast<int64_t>(current_message_size_)) {
+     if (in_->Finished()) {
+       status_ = absl::Status(
+           absl::StatusCode::kInternal,
+diff --git a/src/request_stream_translator.cc b/src/request_stream_translator.cc
+index ab679cc..176f2d3 100644
+--- a/src/request_stream_translator.cc
++++ b/src/request_stream_translator.cc
+@@ -172,7 +172,7 @@ RequestStreamTranslator* RequestStreamTranslator::RenderUint32(
+ }
+ 
+ RequestStreamTranslator* RequestStreamTranslator::RenderInt64(
+-    absl::string_view name, pb::int64 value) {
++    absl::string_view name, int64_t value) {
+   RenderData(name, [this, name, value]() {
+     translator_->Input().RenderInt64(name, value);
+   });
+diff --git a/test/path_matcher_test.cc b/test/path_matcher_test.cc
+index b63ddd5..b7e5613 100644
+--- a/test/path_matcher_test.cc
++++ b/test/path_matcher_test.cc
+@@ -171,9 +171,9 @@ class PathMatcherTest : public ::testing::Test {
+         a__c);
+ 
+     EXPECT_EQ(
+-        VariableBindings({// Single-part component is always fully decoded.
+-                  VariableBinding{FieldPath{"x"}, "!#$&'()*+,/:;=?@[]"},
+-                  // Multi-part component depends on the builder configuration.
++        VariableBindings({// Both single-part and multi-part components depend
++                          // on the builder configuration.
++                  VariableBinding{FieldPath{"x"}, expected_component},
+                   VariableBinding{FieldPath{"y"}, expected_component}}),
+         bindings);
+   }
+@@ -321,7 +321,23 @@ TEST_F(PathMatcherTest, PercentEscapesUnescapedForSingleSegment) {
+   EXPECT_NE(nullptr, a_c);
+ 
+   VariableBindings bindings;
+-  // Also test '+',  make sure it is not unescaped
++  // Under default kAllCharactersExceptReserved, unreserved %20 is unescaped
++  // while reserved %2F and '+' remain intact.
++  EXPECT_EQ(Lookup("GET", "/a/p%20q%2Fr+/c", &bindings), a_c);
++  EXPECT_EQ(VariableBindings({
++                VariableBinding{FieldPath{"x"}, "p q%2Fr+"},
++            }),
++            bindings);
++}
++
++TEST_F(PathMatcherTest, PercentEscapesUnescapedForSingleSegmentAllCharacters) {
++  SetUrlUnescapeSpec(UrlUnescapeSpec::kAllCharacters);
++  MethodInfo* a_c = AddGetPath("/a/{x}/c");
++  Build();
++
++  EXPECT_NE(nullptr, a_c);
++
++  VariableBindings bindings;
+   EXPECT_EQ(Lookup("GET", "/a/p%20q%2Fr+/c", &bindings), a_c);
+   EXPECT_EQ(VariableBindings({
+                 VariableBinding{FieldPath{"x"}, "p q/r+"},
+@@ -344,6 +360,7 @@ char HexDigit(unsigned char digit, bool uppercase) {
+ }  // namespace {
+ 
+ TEST_F(PathMatcherTest, PercentEscapesUnescapedForSingleSegmentAllAsciiChars) {
++  SetUrlUnescapeSpec(UrlUnescapeSpec::kAllCharacters);
+   MethodInfo* a_c = AddGetPath("/{x}");
+   Build();
+ 
+@@ -958,6 +975,54 @@ TEST_F(PathMatcherTest, RegisterFailsOnDuplicateIfOptIn) {
+   EXPECT_EQ(LookupNoBindings("GET", "/a/b"), nullptr);
+ }
+ 
++TEST_F(PathMatcherTest, CustomVerbDoesNotCollideWithHttpMethod) {
++  SetMatchUnregisteredCustomVerb(true);
++  MethodInfo* delete_shelf = AddPath("DELETE", "/v1/shelves/{shelf}");
++  MethodInfo* cancel_shelf = AddPath("POST", "/v1/shelves/{shelf}:cancel");
++  Build();
++
++  EXPECT_NE(nullptr, delete_shelf);
++  EXPECT_NE(nullptr, cancel_shelf);
++
++  VariableBindings bindings;
++  EXPECT_EQ(Lookup("D", "/v1/shelves/100:ELETE", &bindings), nullptr);
++  EXPECT_EQ(LookupNoBindings("D", "/v1/shelves/100:ELETE"), nullptr);
++  EXPECT_EQ(Lookup("POST:cancel", "/v1/shelves/100", &bindings), nullptr);
++  EXPECT_EQ(LookupNoBindings("POST:cancel", "/v1/shelves/100"), nullptr);
++  EXPECT_EQ(Lookup("DELETE", "/v1/shelves/100", &bindings), delete_shelf);
++  EXPECT_EQ(Lookup("POST", "/v1/shelves/100:cancel", &bindings), cancel_shelf);
++}
++
++TEST_F(PathMatcherTest, TrailingSlashDoesNotMatchWithoutTrailingSlash) {
++  MethodInfo* get_shelf = AddGetPath("/v1/shelves/{shelf}");
++  MethodInfo* ab = AddGetPath("/a/b");
++  Build();
++
++  EXPECT_NE(nullptr, get_shelf);
++  EXPECT_NE(nullptr, ab);
++
++  VariableBindings bindings;
++  EXPECT_EQ(Lookup("GET", "/v1/shelves/100/", &bindings), nullptr);
++  EXPECT_EQ(LookupNoBindings("GET", "/v1/shelves/100/"), nullptr);
++  EXPECT_EQ(LookupNoBindings("GET", "/a/b/"), nullptr);
++  EXPECT_EQ(Lookup("GET", "/v1/shelves/100", &bindings), get_shelf);
++  EXPECT_EQ(LookupNoBindings("GET", "/a/b"), ab);
++}
++
++TEST_F(PathMatcherTest, SingleSegmentBindingPreservesReservedPercentEncoding) {
++  MethodInfo* get_shelf = AddGetPath("/v1/shelves/{shelf}");
++  Build();
++
++  EXPECT_NE(nullptr, get_shelf);
++
++  VariableBindings bindings;
++  EXPECT_EQ(Lookup("GET", "/v1/shelves/%2B100", &bindings), get_shelf);
++  EXPECT_EQ(VariableBindings({
++                VariableBinding{FieldPath{"shelf"}, "%2B100"},
++            }),
++            bindings);
++}
++
+ }  // namespace
+ 
+ }  // namespace transcoding
