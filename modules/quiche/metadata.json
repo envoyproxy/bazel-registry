@@ -12,7 +12,6 @@
     ],
     "versions": [
         "0.0.0-261006-9e60ac2.envoy",
-        "0.0.0-261105-35cbd03.envoy",
         "0.0.0-261111-9917bea.envoy"
     ],
     "yanked_versions": {}
