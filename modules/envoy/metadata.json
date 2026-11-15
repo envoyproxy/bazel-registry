@@ -1,20 +1,19 @@
 {
-  "homepage": "https://github.com/envoyproxy/envoy",
-  "maintainers": [
-    {
-      "email": "maintainers@envoyproxy.io",
-      "github": "envoyproxy",
-      "name": "Envoy Proxy Maintainers"
-    }
-  ],
-  "repository": [
-    "github:envoyproxy/envoy"
-  ],
-  "versions": [
-    "1.40.0-dev.20261009.189f198.envoy",
-    "1.40.0-dev.20261009.189f198.envoy.1",
-    "1.40.0.envoy",
-    "1.41.0-dev.20261028.011e396.envoy"
-  ],
-  "yanked_versions": {}
+    "homepage": "https://github.com/envoyproxy/envoy",
+    "maintainers": [
+        {
+            "email": "maintainers@envoyproxy.io",
+            "github": "envoyproxy",
+            "name": "Envoy Proxy Maintainers"
+        }
+    ],
+    "repository": [
+        "github:envoyproxy/envoy"
+    ],
+    "versions": [
+        "1.40.0-dev.20261009.189f198.envoy",
+        "1.40.0.envoy",
+        "1.41.0-dev.20261028.011e396.envoy"
+    ],
+    "yanked_versions": {}
 }
